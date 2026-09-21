@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  SUSPENDED
+  EXPIRED
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String
+  passwordHash String
+  role         Role           @default(USER)
+  createdAt    DateTime       @default(now())
+  cats         Cat[]
+  subscriptions Subscription[]
+}
+
+model Cat {
+  id          String         @id @default(uuid())
+  name        String
+  breed       String
+  bio         String
+  avatar      String         @default("/cats/marmalade.svg")
+  ownerId     String
+  owner       User           @relation(fields: [ownerId], references: [id])
+  createdAt   DateTime       @default(now())
+  posts       Post[]
+  subscriptions Subscription[]
+  @@index([ownerId])
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  isPrivate Boolean  @default(false)
+  imageKey  String?
+  catId     String
+  cat       Cat      @relation(fields: [catId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@index([catId, createdAt])
+}
+
+model Subscription {
+  id           String             @id @default(uuid())
+  userId       String
+  user         User               @relation(fields: [userId], references: [id])
+  catId        String
+  cat          Cat                @relation(fields: [catId], references: [id])
+  paypalId     String?            @unique
+  checkoutKey  String             @default(uuid())
+  status       SubscriptionStatus @default(PENDING)
+  paidUntil    DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  @@unique([userId, catId])
+}
+
+model WebhookEvent {
+  id          String   @id
+  processedAt DateTime @default(now())
+}
