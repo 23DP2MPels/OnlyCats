@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: onlycats
+      POSTGRES_USER: onlycats
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-onlycats_local}
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U onlycats -d onlycats']
+      interval: 5s
+      timeout: 3s
+      retries: 15
+  backend:
+    build:
+      context: .
+      dockerfile: devops/backend.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://onlycats:${POSTGRES_PASSWORD:-onlycats_local}@postgres:5432/onlycats?schema=public
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_PLAN_ID: ${PAYPAL_PLAN_ID:-}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:-}
+    volumes:
+      - uploads:/app/backend/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+  frontend:
+    build:
+      context: .
+      dockerfile: devops/frontend.Dockerfile
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend
+volumes:
+  postgres_data:
+  uploads:
