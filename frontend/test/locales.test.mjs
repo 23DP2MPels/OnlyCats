@@ -30,7 +30,9 @@ test('every literal translation used by a Vue page exists in the catalogs', asyn
   const views = new URL('../src/views/', import.meta.url);
   const files = [
     new URL('../src/App.vue', import.meta.url),
-    new URL('../src/components/CatCard.vue', import.meta.url),
+    ...(await readdir(new URL('../src/components/', import.meta.url)))
+      .filter((file) => file.endsWith('.vue'))
+      .map((file) => new URL(`../src/components/${file}`, import.meta.url)),
     ...(await readdir(views)).map((file) => new URL(file, views)),
   ];
   for (const file of files) {

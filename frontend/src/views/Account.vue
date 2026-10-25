@@ -2,6 +2,7 @@
 import { t } from '../i18n';
 import { onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useRoute } from 'vue-router';
 import {
   api,
   session,
@@ -21,7 +22,12 @@ const error = ref('');
 const notice = ref('');
 const loading = ref(true);
 const busy = ref(false);
-const tab = ref('cats');
+const route = useRoute();
+const tab = ref(
+  ['posts', 'subscriptions'].includes(String(route.query.tab))
+    ? String(route.query.tab)
+    : 'cats',
+);
 const catFormOpen = ref(false);
 const editingCat = ref<string | null>(null);
 const selectedCat = ref('');
@@ -37,6 +43,8 @@ const catForm = reactive({
 });
 const postForm = reactive({ title: '', body: '', isPrivate: true });
 const avatars = [
+  '/cats/marmalade.jpg',
+  '/cats/luna.jpg',
   '/cats/marmalade.svg',
   '/cats/luna.svg',
   '/cats/oliver.svg',

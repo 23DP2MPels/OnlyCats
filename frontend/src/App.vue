@@ -23,11 +23,13 @@ async function signOut() {
   <div class="site-shell">
     <header class="header wrap">
       <RouterLink to="/" class="logo" :aria-label="t('OnlyCats — главная')"
-        ><span class="logo-mark">oc<span>✦</span></span
-        >only<span>cats</span><span class="logo-dot">.</span></RouterLink
+        ><img class="logo-mark" src="/cat-logo.svg" alt="" />only<span
+          >cats</span
+        ><span class="logo-dot">.</span></RouterLink
       >
       <nav :aria-label="t('Основная навигация')">
-        <RouterLink to="/">{{ t('Найти своего кота') }}</RouterLink
+        <RouterLink to="/">{{ t('Лента') }}</RouterLink>
+        <RouterLink to="/explore">{{ t('Найти своего кота') }}</RouterLink
         ><RouterLink to="/account">{{ t('Мой уголок') }}</RouterLink>
       </nav>
       <div class="header-actions">
@@ -69,7 +71,11 @@ async function signOut() {
     <main><RouterView /></main>
     <footer class="footer wrap">
       <RouterLink to="/" class="logo footer-logo"
-        >only<span>cats</span>.</RouterLink
+        ><img
+          class="footer-cat-logo"
+          src="/cat-logo.svg"
+          alt=""
+        />only<span>cats</span>.</RouterLink
       >
       <p>{{ t('Меньше скролла. Больше мурчания.') }}</p>
       <span>{{ t('Учебный проект · PayPal Sandbox · 2026') }}</span>

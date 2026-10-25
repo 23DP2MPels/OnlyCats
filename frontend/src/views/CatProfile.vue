@@ -2,11 +2,12 @@
 import { t } from '../i18n';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { api, session, formatDate, type Cat, type Post } from '../api';
+import { api, session, type Cat } from '../api';
+import SocialPost, { type FeedPost } from '../components/SocialPost.vue';
 const route = useRoute();
 const router = useRouter();
 const cat = ref<Cat | null>(null);
-const posts = ref<Post[]>([]);
+const posts = ref<FeedPost[]>([]);
 const error = ref('');
 const loading = ref(true);
 const busy = ref(false);
@@ -16,7 +17,7 @@ async function load() {
     const id = route.params.id;
     [cat.value, posts.value] = await Promise.all([
       api<Cat>(`/cats/${id}`),
-      api<Post[]>(`/cats/${id}/posts`),
+      api<FeedPost[]>(`/cats/${id}/posts`),
     ]);
   } catch (e) {
     error.value = (e as Error).message;
@@ -117,39 +118,16 @@ onMounted(load);
       <div v-if="!posts.length" class="empty">
         {{ t('Первая история ещё впереди.') }}
       </div>
-      <div class="post-grid">
-        <article v-for="post in posts" :key="post.id" class="post-card">
-          <div v-if="post.locked" class="locked-photo">
-            <span>♡</span>
-            <h3>{{ t('Только для своих') }}</h3>
-            <p>{{ t('Ещё одна причина вступить в клуб.') }}</p>
-            <button class="button" :disabled="busy" @click="subscribe">
-              {{ t('Открыть с подпиской ↗') }}
-            </button>
-          </div>
-          <img
-            v-else-if="post.imageUrl"
-            class="post-image"
-            :src="post.imageUrl"
-            :alt="post.title"
-          />
-          <div v-else class="post-placeholder">
-            <img :src="cat.avatar" :alt="cat.name" />
-          </div>
-          <div class="post-content">
-            <div class="post-meta">
-              <span>{{ formatDate(post.createdAt) }}</span
-              ><span>{{
-                post.isPrivate
-                  ? t('♡ Для подписчиков')
-                  : t('◌ Открытая история')
-              }}</span>
-            </div>
-            <h3>{{ post.title }}</h3>
-            <p v-if="!post.locked">{{ post.body }}</p>
-          </div>
-        </article>
-      </div></template
-    >
+      <div class="mx-auto max-w-[760px]">
+        <SocialPost
+          v-for="post in posts"
+          :key="post.id"
+          :post="post"
+          in-profile
+          :subscription-busy="busy"
+          @subscribe="subscribe"
+          @changed="Object.assign(post, $event)"
+        /></div
+    ></template>
   </section>
 </template>
