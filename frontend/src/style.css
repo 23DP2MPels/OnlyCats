@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Bitter:ital,wght@1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500..650&family=Bitter:ital,wght@1,500;1,600&display=swap');
 @import 'tailwindcss';
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @theme inline {
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Nunito Sans', sans-serif;
   --font-serif: 'Bitter', Georgia, serif;
   --color-surface: var(--surface);
   --color-panel: var(--panel);
@@ -14,11 +14,11 @@
 /* Base tokens and reusable components are compiled from Tailwind utilities. */
 @layer components {
   :root {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
     color: var(--ink);
     background: var(--surface);
     font-synthesis: none;
-    font-weight: 550;
+    font-weight: 600;
     --ink: #292824;
     --muted: #79766f;
     --coral: #ef785c;
@@ -88,7 +88,7 @@
     @apply [font-size:1.8125rem] font-semibold [letter-spacing:-1.5px] inline-flex items-center;
   }
   .logo > span:not(.logo-mark):not(.logo-dot) {
-    @apply [font-weight:550];
+    @apply [font-weight:600];
   }
   .logo-mark {
     @apply [width:42px] [height:42px] [border-radius:13px] [background:var(--coral)] [color:#fff] [font-size:1.3125rem] relative [margin-right:10px] grid place-items-center;
@@ -119,7 +119,7 @@
     @apply [width:6px] [height:6px] rounded-full [background:#89a076] [display:inline-block];
   }
   .button {
-    @apply [border:1px_solid_var(--ink)] [border-radius:8px] inline-flex justify-center items-center [gap:24px] [padding:15px_22px] [background:transparent] [color:var(--ink)] [font-size:0.8125rem] [font-weight:550] [transition:background_0.2s,_transform_0.2s];
+    @apply [border:1px_solid_var(--ink)] [border-radius:8px] inline-flex justify-center items-center [gap:24px] [padding:15px_22px] [background:transparent] [color:var(--ink)] [font-size:0.8125rem] [font-weight:600] [transition:background_0.2s,_transform_0.2s];
   }
   .button:hover {
     @apply [background:var(--hover)] [transform:translateY(-1px)];
@@ -1406,7 +1406,7 @@
     --line: #48515f;
   }
   body {
-    @apply [font-weight:550] antialiased;
+    @apply [font-weight:600] antialiased;
   }
   button,
   .button,
@@ -1420,13 +1420,13 @@
     @apply [font-weight:650] [letter-spacing:-0.04em];
   }
   .feed-tabs {
-    @apply [padding:5px] [gap:5px] [border:1px_solid_var(--line)] [border-radius:12px] [background:var(--soft)];
+    @apply [padding:0] [gap:20px] [border-width:0_0_1px] [border-style:solid] [border-color:var(--line)] [border-radius:0] [background:transparent];
   }
   .feed-tabs button {
-    @apply [border:0] [border-radius:8px] [min-height:44px] [font-size:0.75rem] font-semibold;
+    @apply inline-flex items-center justify-center [gap:10px] [padding:17px_10px] [border-width:0_0_3px] [border-style:solid] [border-color:transparent] [border-radius:0] [min-height:54px] [font-size:0.8125rem] font-semibold [color:var(--muted)] [transition:color_150ms,border-color_150ms];
   }
   .feed-tabs button.active {
-    @apply [background:var(--panel)] [box-shadow:0_2px_8px_#00000020] [color:var(--ink)] [outline:1px_solid_var(--line)];
+    @apply [background:transparent] shadow-none [color:var(--ink)] [outline:0] [border-bottom-color:var(--coral)];
   }
   .feed-stories {
     @apply [padding:20px_12px] [border:1px_solid_var(--line)] [border-radius:12px] [background:var(--panel)] [margin-bottom:20px];
@@ -1445,7 +1445,7 @@
   .social-right-note,
   .social-post-actions button,
   .post-profile-link {
-    @apply [font-size:0.625rem] [font-weight:550];
+    @apply [font-size:0.625rem] [font-weight:600];
   }
   .social-post {
     @apply [border-width:1.5px] [margin-bottom:28px] [box-shadow:0_6px_22px_#0000000c];
@@ -1460,7 +1460,7 @@
     @apply [font-size:1.125rem] [font-weight:650] [line-height:1.45];
   }
   .social-post-text p {
-    @apply [font-size:0.8125rem] [font-weight:550] [line-height:1.75];
+    @apply [font-size:0.8125rem] [font-weight:600] [line-height:1.75];
   }
   .social-post-actions {
     @apply [border-top:1px_solid_var(--line)] [background:var(--soft)] [min-height:64px];
@@ -1473,7 +1473,7 @@
   }
   .social-paywall p,
   .social-welcome p {
-    @apply [font-size:0.6875rem] [font-weight:550];
+    @apply [font-size:0.6875rem] [font-weight:600];
   }
   .social-paywall small {
     @apply [font-size:0.5625rem];
@@ -1532,6 +1532,40 @@
     }
     .header-actions > .button {
       @apply [max-width:65px] [padding-inline:7px];
+    }
+  }
+}
+
+@layer components {
+  :root[data-theme='dark'] {
+    --ink: #f0f3f8;
+    --muted: #c3cbd6;
+  }
+  .feed-tabs button:hover {
+    color: var(--ink);
+  }
+  .feed-tabs button.active svg {
+    color: var(--coral);
+  }
+  .footer p,
+  .footer > span,
+  .sidebar-footnote small,
+  .social-right-note,
+  .post-author small,
+  .visibility-badge,
+  .suggested-cat small,
+  .discover-heading > a,
+  .social-comment small,
+  .social-paywall small,
+  .subscribe-card > small {
+    @apply [font-size:0.6875rem] font-semibold [line-height:1.6];
+  }
+  @media (max-width: 760px) {
+    .feed-tabs {
+      @apply [gap:12px];
+    }
+    .feed-tabs button {
+      @apply [font-size:0.75rem] [gap:7px] [padding-inline:5px];
     }
   }
 }

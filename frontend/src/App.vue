@@ -70,15 +70,7 @@ async function signOut() {
     <div v-if="t(error)" class="notice wrap" role="alert">{{ t(error) }}</div>
     <main><RouterView /></main>
     <footer class="footer wrap">
-      <RouterLink to="/" class="logo footer-logo"
-        ><img
-          class="footer-cat-logo"
-          src="/cat-logo.svg"
-          alt=""
-        />only<span>cats</span>.</RouterLink
-      >
       <p>{{ t('Меньше скролла. Больше мурчания.') }}</p>
-      <span>{{ t('Учебный проект · PayPal Sandbox · 2026') }}</span>
     </footer>
   </div>
 </template>

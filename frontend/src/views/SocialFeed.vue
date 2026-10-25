@@ -60,12 +60,6 @@ function patch(id: string, changes: Partial<FeedPost>) {
 <template>
   <div class="social-layout wrap">
     <aside class="social-sidebar">
-      <div class="social-sidebar-heading">
-        <img src="/cat-logo.svg" alt="" />
-        <div>
-          <strong>OnlyCats</strong><small>{{ t('Место, где вас ждут') }}</small>
-        </div>
-      </div>
       <nav :aria-label="t('Разделы соцсети')">
         <RouterLink to="/" :class="{ selected: scope === 'all' }"
           ><UiIcon name="home" />{{ t('Лента') }}</RouterLink
@@ -88,7 +82,6 @@ function patch(id: string, changes: Partial<FeedPost>) {
       <div class="sidebar-footnote">
         <span>✦</span>
         <p>{{ t('Больше котов. Ближе друг к другу.') }}</p>
-        <small>PayPal Sandbox · OnlyCats 2026</small>
       </div>
     </aside>
     <section class="social-main">
@@ -99,14 +92,19 @@ function patch(id: string, changes: Partial<FeedPost>) {
         </div>
         <span class="feed-live"><span></span>{{ t('Всё самое мур') }}</span>
       </header>
-      <div class="feed-tabs" :aria-label="t('Фильтр ленты')">
-        <button :class="{ active: scope === 'all' }" @click="setScope('all')">
-          {{ t('Для вас') }}</button
+      <div class="feed-tabs" role="group" :aria-label="t('Фильтр ленты')">
+        <button
+          :class="{ active: scope === 'all' }"
+          :aria-pressed="scope === 'all'"
+          @click="setScope('all')"
+        >
+          <UiIcon name="home" :size="20" />{{ t('Для вас') }}</button
         ><button
           :class="{ active: scope === 'subscriptions' }"
+          :aria-pressed="scope === 'subscriptions'"
           @click="setScope('subscriptions')"
         >
-          {{ t('Мои подписки') }}
+          <UiIcon name="heart" :size="20" />{{ t('Мои подписки') }}
         </button>
       </div>
       <div class="feed-stories">
@@ -201,9 +199,6 @@ function patch(id: string, changes: Partial<FeedPost>) {
           t('Найти своего кота ↗')
         }}</RouterLink>
       </section>
-      <p class="social-right-note">
-        {{ t('Учебный проект · PayPal Sandbox · 2026') }}
-      </p>
     </aside>
   </div>
 </template>
