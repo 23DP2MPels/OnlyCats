@@ -68,10 +68,8 @@ onMounted(load);
     <div class="hero-art">
       <span class="doodle-star star-one">✳</span>
       <div class="hero-photo">
-        <img
-          src="/cats/hero.svg"
-          :alt="t('Рыжий кот Мармелад отдыхает на подушке')"
-        /><span class="photo-label"
+        <img src="/cats/marmalade.jpg" :alt="t('Мармелад')" /><span
+          class="photo-label"
           ><span class="online-dot"></span> {{ t('Мармелад') }}
           <small>{{ t('сейчас занят ничегонеделанием') }}</small></span
         ><span class="photo-heart">♡</span>
