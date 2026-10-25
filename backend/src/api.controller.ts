@@ -214,12 +214,20 @@ export class ApiController {
       where: { catId: id },
       orderBy: { createdAt: 'desc' },
       take: 100,
+      include: {
+        _count: { select: { likes: true, comments: true } },
+        likes: { where: { userId: user?.id || '' }, select: { userId: true } },
+      },
     });
     return posts.map((post) => {
       const locked = post.isPrivate && !allowed;
       return {
         id: post.id,
         catId: id,
+        cat,
+        liked: post.likes.length > 0,
+        likes: post._count.likes,
+        comments: post._count.comments,
         title: post.title,
         body: locked ? null : post.body,
         isPrivate: post.isPrivate,

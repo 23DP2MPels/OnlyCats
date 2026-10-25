@@ -31,6 +31,8 @@ export class CatDto {
     '/cats/luna.svg',
     '/cats/oliver.svg',
     '/cats/mochi.svg',
+    '/cats/marmalade.jpg',
+    '/cats/luna.jpg',
   ])
   avatar?: string;
 }
@@ -41,4 +43,8 @@ export class PostDto {
 }
 export class SubscribeDto {
   @IsUUID() catId!: string;
+}
+
+export class CommentDto {
+  @IsString() @Length(1, 1000) @Matches(/\S/) body!: string;
 }

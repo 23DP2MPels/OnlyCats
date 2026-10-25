@@ -1,5 +1,13 @@
 # HTTP API
 
+Социальные маршруты: `GET /feed?scope=all|subscriptions&cursor=UUID` — лента
+по 20 записей с nextCursor; `PUT /posts/:id/like` и `DELETE /posts/:id/like` —
+идемпотентный лайк/снятие лайка; `GET /posts/:id/comments` — последние 50
+комментариев; `POST /posts/:id/comments` — JSON `{ "body": "..." }`, до 1000
+символов. Создание реакций требует сессии. Для приватного поста комментарии и
+лайки дополнительно требуют доступа к публикации. Лента не выдаёт закрытые
+тексты, изображения, ключи файлов или списки подписок других пользователей.
+
 Префикс `/api`. JSON-запросы, кроме multipart для изображения.
 Сессия — cookie `onlycats_session`, браузер передаёт `credentials: include`.
 Описание маршрутов Swagger доступно по `/api/docs`, JSON — `/api/docs-json`.

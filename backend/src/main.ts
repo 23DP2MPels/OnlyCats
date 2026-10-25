@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 import { ApiController } from './api.controller';
+import { SocialController } from './social.controller';
 import { PrismaService } from './prisma.service';
 import { AuthGuard, OptionalAuthGuard } from './auth';
 import { PaypalService } from './paypal.service';
@@ -14,7 +15,7 @@ import { SubscriptionsService } from './subscriptions.service';
 import { config, validateConfig } from './config';
 
 @Module({
-  controllers: [ApiController],
+  controllers: [ApiController, SocialController],
   providers: [
     PrismaService,
     PaypalService,
