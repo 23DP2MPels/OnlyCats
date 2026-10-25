@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api, session, formatDate, type Cat, type Post } from '../api';
 import { t } from '../i18n';
+import UiIcon from './UiIcon.vue';
 export interface FeedPost extends Post {
   cat: Cat;
   likes: number;
@@ -112,7 +113,7 @@ async function send() {
       <p v-if="!post.locked">{{ post.body }}</p>
     </div>
     <div v-if="post.locked" class="social-paywall">
-      <div class="paywall-icon">♧</div>
+      <div class="paywall-icon"><UiIcon name="lock" :size="34" /></div>
       <h3>{{ t('Только для своих') }}</h3>
       <p>{{ t('Оформите подписку, чтобы увидеть эту историю.') }}</p>
       <button
@@ -143,17 +144,14 @@ async function send() {
         :aria-label="post.liked ? t('Убрать лайк') : t('Нравится')"
         @click="like"
       >
-        <span>{{ post.liked ? '♥' : '♡' }}</span
-        >{{ post.likes }}</button
+        <UiIcon name="heart" :filled="post.liked" />{{ post.likes }}</button
       ><button
         :disabled="busy || post.locked"
         :aria-expanded="expanded"
         :aria-label="t('Комментарии')"
         @click="toggleComments"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20 11a8 8 0 0 1-8 8H5l-3 3V11a9 9 0 0 1 18 0Z" /></svg
-        >{{ post.comments }}</button
+        <UiIcon name="message" />{{ post.comments }}</button
       ><RouterLink :to="`/cats/${post.catId}`" class="post-profile-link"
         >{{ t('К профилю') }} ↗</RouterLink
       >

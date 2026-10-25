@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { api, session, type Cat } from '../api';
 import { t } from '../i18n';
 import SocialPost, { type FeedPost } from '../components/SocialPost.vue';
+import UiIcon from '../components/UiIcon.vue';
 const route = useRoute();
 const router = useRouter();
 const scope = computed(() =>
@@ -67,21 +68,22 @@ function patch(id: string, changes: Partial<FeedPost>) {
       </div>
       <nav :aria-label="t('Разделы соцсети')">
         <RouterLink to="/" :class="{ selected: scope === 'all' }"
-          ><span>⌂</span>{{ t('Лента') }}</RouterLink
+          ><UiIcon name="home" />{{ t('Лента') }}</RouterLink
         ><RouterLink
           to="/?tab=subscriptions"
           :class="{ selected: scope === 'subscriptions' }"
-          ><span>♡</span>{{ t('Мои подписки') }}</RouterLink
+          ><UiIcon name="heart" />{{ t('Мои подписки') }}</RouterLink
         ><RouterLink to="/explore"
-          ><span>⌕</span>{{ t('Найти кота') }}</RouterLink
+          ><UiIcon name="search" />{{ t('Найти кота') }}</RouterLink
         ><RouterLink to="/account"
-          ><span>◉</span>{{ t('Мой профиль') }}</RouterLink
+          ><UiIcon name="user" />{{ t('Мой профиль') }}</RouterLink
         >
       </nav>
       <RouterLink
         class="button primary full create-story"
         to="/account?tab=posts"
-        >+ {{ t('Создать историю') }}</RouterLink
+        ><UiIcon name="plus" :size="18" />
+        {{ t('Создать историю') }}</RouterLink
       >
       <div class="sidebar-footnote">
         <span>✦</span>
@@ -112,7 +114,8 @@ function patch(id: string, changes: Partial<FeedPost>) {
           ><span><img :src="cat.avatar" :alt="cat.name" /></span
           ><strong>{{ cat.name }}</strong></RouterLink
         ><RouterLink class="add-story-link" to="/account?tab=posts"
-          ><span>+</span><strong>{{ t('Ваша история') }}</strong></RouterLink
+          ><span><UiIcon name="plus" :size="24" /></span
+          ><strong>{{ t('Ваша история') }}</strong></RouterLink
         >
       </div>
       <RouterLink class="feed-composer" to="/account?tab=posts"
@@ -122,8 +125,8 @@ function patch(id: string, changes: Partial<FeedPost>) {
           }}<small>{{
             t('Поделитесь фотографией или маленькой историей')
           }}</small></span
-        ><span class="composer-plus">+</span></RouterLink
-      >
+        ><span class="composer-plus"><UiIcon name="plus" :size="22" /></span
+      ></RouterLink>
       <p v-if="loading" class="empty">{{ t('Собираем котов…') }}</p>
       <div v-else-if="error" class="empty" role="alert">
         <p>{{ t(error) }}</p>
@@ -181,8 +184,8 @@ function patch(id: string, changes: Partial<FeedPost>) {
             <strong>{{ cat.name }} <span>✦</span></strong
             ><small>{{ cat.breed }}</small>
           </div>
-          <span class="suggested-plus">+</span></RouterLink
-        >
+          <span class="suggested-plus"><UiIcon name="plus" :size="20" /></span
+        ></RouterLink>
       </section>
       <section class="social-welcome">
         <span class="eyebrow">ONLY CATS. ONLY LOVE.</span

@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Bitter:ital,wght@1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Bitter:ital,wght@1,500;1,600&display=swap');
 @import 'tailwindcss';
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @theme inline {
-  --font-sans: 'Onest', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --font-serif: 'Bitter', Georgia, serif;
   --color-surface: var(--surface);
   --color-panel: var(--panel);
@@ -14,11 +14,11 @@
 /* Base tokens and reusable components are compiled from Tailwind utilities. */
 @layer components {
   :root {
-    font-family: 'Onest', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: var(--ink);
     background: var(--surface);
     font-synthesis: none;
-    font-weight: 500;
+    font-weight: 550;
     --ink: #292824;
     --muted: #79766f;
     --coral: #ef785c;
@@ -1086,16 +1086,16 @@
     @apply flex [gap:17px] [padding-bottom:19px] overflow-x-auto [margin-bottom:9px];
   }
   .feed-stories > a {
-    @apply flex flex-col items-center [gap:8px] [flex-shrink:0] [width:65px];
+    @apply grid justify-items-center items-start [grid-template-rows:64px_20px] [gap:8px] shrink-0 [width:76px];
   }
   .feed-stories > a > span {
-    @apply grid place-items-center [width:61px] [height:61px] [border:1.5px_solid_var(--coral)] [padding:3px] rounded-full;
+    @apply relative flex items-center justify-center shrink-0 overflow-hidden [width:64px] [height:64px] [border:1.5px_solid_var(--coral)] [padding:3px] rounded-full;
   }
   .feed-stories img {
-    @apply [width:100%] [height:100%] rounded-full object-cover;
+    @apply absolute [inset:3px] block [width:calc(100%_-_6px)] [height:calc(100%_-_6px)] rounded-full object-cover;
   }
   .feed-stories strong {
-    @apply [font-size:0.5625rem] [font-weight:550] [max-width:75px] overflow-hidden text-ellipsis whitespace-nowrap;
+    @apply block [width:76px] [height:20px] [line-height:20px] [font-size:0.625rem] font-semibold text-center overflow-hidden text-ellipsis whitespace-nowrap;
   }
   .feed-stories > a.add-story-link > span {
     @apply [border:1px_dashed_var(--line)] [color:var(--muted)] [font-size:1.625rem];
@@ -1390,6 +1390,127 @@
   strong,
   b {
     font-weight: 600;
+  }
+}
+
+@layer components {
+  :root {
+    --muted: #68665f;
+    --line: #d5d0c7;
+  }
+  :root[data-theme='dark'] {
+    --surface: #15181d;
+    --panel: #22272f;
+    --soft: #2b313b;
+    --muted: #b9bec7;
+    --line: #48515f;
+  }
+  body {
+    @apply [font-weight:550] antialiased;
+  }
+  button,
+  .button,
+  .header nav,
+  .social-sidebar nav a {
+    @apply font-semibold;
+  }
+  .feed-heading h1,
+  .profile-copy h1,
+  .account-page > h1 {
+    @apply [font-weight:650] [letter-spacing:-0.04em];
+  }
+  .feed-tabs {
+    @apply [padding:5px] [gap:5px] [border:1px_solid_var(--line)] [border-radius:12px] [background:var(--soft)];
+  }
+  .feed-tabs button {
+    @apply [border:0] [border-radius:8px] [min-height:44px] [font-size:0.75rem] font-semibold;
+  }
+  .feed-tabs button.active {
+    @apply [background:var(--panel)] [box-shadow:0_2px_8px_#00000020] [color:var(--ink)] [outline:1px_solid_var(--line)];
+  }
+  .feed-stories {
+    @apply [padding:20px_12px] [border:1px_solid_var(--line)] [border-radius:12px] [background:var(--panel)] [margin-bottom:20px];
+  }
+  .feed-stories strong {
+    @apply [font-size:0.625rem] font-semibold [color:var(--ink)];
+  }
+  .feed-composer {
+    @apply [border-width:1.5px] [margin-bottom:28px];
+  }
+  .feed-composer small,
+  .post-author small,
+  .visibility-badge,
+  .suggested-cat small,
+  .discover-heading > a,
+  .social-right-note,
+  .social-post-actions button,
+  .post-profile-link {
+    @apply [font-size:0.625rem] [font-weight:550];
+  }
+  .social-post {
+    @apply [border-width:1.5px] [margin-bottom:28px] [box-shadow:0_6px_22px_#0000000c];
+  }
+  .social-post-header {
+    @apply [padding-top:22px] [padding-bottom:18px] [border-bottom:1px_solid_var(--line)];
+  }
+  .social-post-text {
+    @apply [padding-top:20px] [padding-bottom:22px];
+  }
+  .social-post-text h2 {
+    @apply [font-size:1.125rem] [font-weight:650] [line-height:1.45];
+  }
+  .social-post-text p {
+    @apply [font-size:0.8125rem] [font-weight:550] [line-height:1.75];
+  }
+  .social-post-actions {
+    @apply [border-top:1px_solid_var(--line)] [background:var(--soft)] [min-height:64px];
+  }
+  .social-paywall {
+    @apply [min-height:310px] [border-block:1px_solid_var(--line)] [background:var(--soft)];
+  }
+  .social-paywall h3 {
+    @apply [font-weight:650];
+  }
+  .social-paywall p,
+  .social-welcome p {
+    @apply [font-size:0.6875rem] [font-weight:550];
+  }
+  .social-paywall small {
+    @apply [font-size:0.5625rem];
+  }
+  .discover-panel {
+    @apply [border-width:1.5px];
+  }
+  .discover-heading {
+    @apply [padding-bottom:16px] [border-bottom:1px_solid_var(--line)];
+  }
+  .suggested-cat {
+    @apply [padding-bottom:16px] [border-bottom:1px_solid_var(--line)];
+  }
+  .suggested-cat:last-child {
+    @apply [padding-bottom:0] [border-bottom:0];
+  }
+  .social-welcome {
+    @apply [border:1px_solid_var(--line)];
+  }
+  @media (min-width: 1001px) {
+    .social-sidebar {
+      @apply [padding-right:18px] [border-right:1px_solid_var(--line)];
+    }
+  }
+  @media (max-width: 760px) {
+    .visibility-badge {
+      @apply [font-size:0.5625rem];
+    }
+    .social-post-text h2 {
+      @apply [font-size:1.0625rem];
+    }
+    .feed-stories {
+      @apply [padding-inline:10px];
+    }
+    .social-sidebar nav {
+      @apply [padding-bottom:16px] [border-bottom:1px_solid_var(--line)];
+    }
   }
 }
 

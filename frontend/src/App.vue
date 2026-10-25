@@ -3,6 +3,7 @@ import { t, ui, locale, languages, theme, toggleTheme } from './i18n';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { session, loadSession, logout } from './api';
+import UiIcon from './components/UiIcon.vue';
 const router = useRouter();
 const error = ref('');
 onMounted(() =>
@@ -52,10 +53,9 @@ async function signOut() {
           :aria-pressed="theme === 'dark'"
           @click="toggleTheme"
         >
-          {{ theme === 'dark' ? '☀' : '☾' }}
+          <UiIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="19" />
         </button>
-        <span class="sandbox"><span></span>Sandbox</span
-        ><template v-if="session.user"
+        <template v-if="session.user"
           ><RouterLink class="button small" to="/account">{{
             session.user.name
           }}</RouterLink
