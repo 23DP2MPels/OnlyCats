@@ -13,7 +13,8 @@
     "paypal:setup": "tsx scripts/paypal-setup.ts",
     "test:http": "node test/http-smoke.mjs",
     "test:paypal": "tsx test/paypal.simulation.ts",
-    "test:subscriptions": "tsx test/subscriptions.simulation.ts"
+    "test:subscriptions": "tsx test/subscriptions.simulation.ts",
+    "test:social": "node test/social-smoke.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",

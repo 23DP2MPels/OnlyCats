@@ -75,19 +75,26 @@ async function main() {
   await mkdir(uploads, { recursive: true });
   for (let i = 0; i < cats.length; i++) {
     const { avatar, ...cat } = cats[i];
+    const asset = ['marmalade', 'luna'].includes(avatar)
+      ? `${avatar}.jpg`
+      : `${avatar}.svg`;
     await prisma.cat.upsert({
       where: { id: cat.id },
       update: {},
       create: {
         ...cat,
-        avatar: `/cats/${avatar}.svg`,
+        avatar: `/cats/${asset}`,
         ownerId: owner.id,
         createdAt: new Date(Date.UTC(2026, 8, 20, 12, i)),
       },
     });
-    const source = await readFile(
-      resolve('../frontend/public/cats', `${avatar}.svg`),
-    );
+    // Upgrade only untouched demo avatars; preserve avatars edited by users.
+    if (asset.endsWith('.jpg'))
+      await prisma.cat.updateMany({
+        where: { id: cat.id, avatar: `/cats/${avatar}.svg` },
+        data: { avatar: `/cats/${asset}` },
+      });
+    const source = await readFile(resolve('../frontend/public/cats', asset));
     for (let j = 0; j < 2; j++) {
       const imageKey = `seed-${avatar}-${j}.jpg`;
       await writeFile(

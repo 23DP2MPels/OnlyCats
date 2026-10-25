@@ -28,6 +28,8 @@ model User {
   createdAt    DateTime       @default(now())
   cats         Cat[]
   subscriptions Subscription[]
+  likes         Like[]
+  comments      Comment[]
 }
 
 model Cat {
@@ -53,7 +55,30 @@ model Post {
   catId     String
   cat       Cat      @relation(fields: [catId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  likes     Like[]
+  comments  Comment[]
   @@index([catId, createdAt])
+}
+
+model Like {
+  userId String
+  postId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@id([userId, postId])
+  @@index([postId])
+}
+
+model Comment {
+  id String @id @default(uuid())
+  body String
+  userId String
+  postId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@index([postId, createdAt])
 }
 
 model Subscription {

@@ -40,3 +40,4 @@ jobs:
             sleep 1
           done
           npm run test:http -w backend || { cat /tmp/onlycats-api.log; exit 1; }
+          npm run test:social -w backend || { cat /tmp/onlycats-api.log; exit 1; }
