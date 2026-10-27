@@ -493,9 +493,10 @@
     @apply [font-size:3rem] [margin:12px_0];
   }
   .account-tabs {
-    @apply flex [border-bottom:1px_solid_var(--line)] [gap:30px] [margin:30px_0];
+    @apply flex overflow-x-auto [border-bottom:1px_solid_var(--line)] [gap:30px] [margin:30px_0];
   }
   .account-tabs button {
+    @apply shrink-0 whitespace-nowrap;
     @apply [background:none] [border:none] [border-bottom:2px_solid_transparent] [padding:16px_0] [font-size:0.8125rem] [color:var(--muted)];
   }
   .account-tabs button.active {
