@@ -1,6 +1,6 @@
 # Komanda
 
-Pašreizējā rekonstruētajā vēsturē ir 29 komiti: Glebam 8, Mairim, Maksimam un Kirillam pa 7.
+Pašreizējā vēsturē ir 37 komiti: Mairim 8, Maksimam 9, Glebam 10 un Kirillam 10 (ieskaitot autoru “Kirills”).
 
 | Dalībnieks | Git autors                              | Atbildības joma                                                     |
 | ---------- | --------------------------------------- | ------------------------------------------------------------------- |

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { t } from '../i18n';
+import CreatorEarnings from '../components/CreatorEarnings.vue';
+import ProfileSettings from '../components/ProfileSettings.vue';
+import TransactionHistory from '../components/TransactionHistory.vue';
 import { onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useRoute } from 'vue-router';
@@ -24,7 +27,9 @@ const loading = ref(true);
 const busy = ref(false);
 const route = useRoute();
 const tab = ref(
-  ['posts', 'subscriptions'].includes(String(route.query.tab))
+  ['posts', 'subscriptions', 'earnings', 'transactions', 'settings'].includes(
+    String(route.query.tab),
+  )
     ? String(route.query.tab)
     : 'cats',
 );
@@ -91,7 +96,12 @@ async function saveCat() {
       editingCat.value ? `/cats/${editingCat.value}` : '/cats',
       {
         method: editingCat.value ? 'PATCH' : 'POST',
-        body: JSON.stringify({ ...catForm, avatar: catForm.avatar.startsWith('/cats/') ? catForm.avatar : undefined }),
+        body: JSON.stringify({
+          ...catForm,
+          avatar: catForm.avatar.startsWith('/cats/')
+            ? catForm.avatar
+            : undefined,
+        }),
       },
     );
     editingCat.value = cat.id;
@@ -207,6 +217,9 @@ onMounted(load);
             cats: t('Мои коты'),
             posts: t('Истории'),
             subscriptions: t('Подписки'),
+            earnings: t('Доходы'),
+            transactions: t('Транзакции'),
+            settings: t('Настройки'),
           }"
           :key="key"
           :class="{ active: tab === key }"
@@ -420,6 +433,9 @@ onMounted(load);
           </article></template
         >
       </section>
+      <CreatorEarnings v-else-if="tab === 'earnings'" />
+      <TransactionHistory v-else-if="tab === 'transactions'" />
+      <ProfileSettings v-else-if="tab === 'settings'" />
       <section v-else>
         <h2>
           {{ t('Ваш маленький') }} <span class="serif">{{ t('клуб.') }}</span>
