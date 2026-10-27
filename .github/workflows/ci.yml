@@ -3,8 +3,19 @@ on: [push, pull_request]
 jobs:
   verify:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: onlycats
+          POSTGRES_USER: onlycats
+          POSTGRES_PASSWORD: onlycats_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U onlycats"
+          --health-interval 5s --health-retries 10
     env:
-      DATABASE_URL: file:./data/onlycats.db
+      DATABASE_URL: postgresql://onlycats:onlycats_ci@localhost:5432/onlycats
       JWT_SECRET: onlycats-ci-secret-at-least-32-characters
       FRONTEND_DIST: ../frontend/dist
     steps:
@@ -19,7 +30,7 @@ jobs:
       - run: npm run db:seed
       - run: npm run build
       - run: npm test
-      - name: HTTP smoke against SQLite
+      - name: HTTP smoke against PostgreSQL
         shell: bash
         run: |
           npm run start -w backend > /tmp/onlycats-api.log 2>&1 &
@@ -32,3 +43,4 @@ jobs:
           npm run test:http -w backend || { cat /tmp/onlycats-api.log; exit 1; }
           npm run test:social -w backend || { cat /tmp/onlycats-api.log; exit 1; }
           npm run test:deployment -w backend || { cat /tmp/onlycats-api.log; exit 1; }
+          npm run test:photos -w backend || { cat /tmp/onlycats-api.log; exit 1; }

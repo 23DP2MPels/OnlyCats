@@ -1,7 +1,7 @@
 # OnlyCats
 
 Mācību projekts tehnikumam: kaķu abonementi un privātas fotogrāfijas.
-Monorepozitorijs: **NestJS + Vue 3 + Prisma ORM + SQLite**.
+Monorepozitorijs: **NestJS + Vue 3 + Prisma ORM + PostgreSQL**.
 Maksājumi notiek tikai **PayPal Sandbox** vidē; īsta nauda netiek izmantota.
 
 ## Iespējas
@@ -34,7 +34,7 @@ Nepieciešams Docker Desktop ar Compose un Git.
 
 ```powershell
 Copy-Item .env.example .env
-# Failā .env aizstājiet JWT_SECRET ar nejaušu virkni, kurā ir vismaz 32 rakstzīmes.
+# Iestatiet POSTGRES_PASSWORD. Failā .env aizstājiet JWT_SECRET ar nejaušu virkni, kurā ir vismaz 32 rakstzīmes.
 docker compose up --build -d
 docker compose exec app npm run db:seed
 ```
@@ -42,36 +42,28 @@ docker compose exec app npm run db:seed
 Vietne: http://localhost:8080 · API: http://localhost:8080/api/docs
 
 Viens NestJS process izsniedz API un Vue būvējuma failus, ieskaitot Vue Router
-maršrutus. Migrācijas tiek izpildītas pirms API palaišanas. SQLite darbojas tajā
-pašā procesā; atsevišķs datubāzes serveris nav vajadzīgs.
+maršrutus. Migrācijas tiek izpildītas pirms API palaišanas. PostgreSQL darbojas
+atsevišķā Compose servisā. Fotoattēli glabājas datubāzes BYTEA laukos.
 
 Apturēšana: `docker compose down`. Dati saglabājas nosauktajos sējumos
-`sqlite_data` un `uploads`. Nelietojiet `down -v`, ja jāsaglabā datubāze un fotoattēli.
+`postgres_data`. Nelietojiet `down -v`, ja jāsaglabā datubāze un fotoattēli.
 Sākotnējo datu skripts paredzēts mācību videi un izveido zināmas demonstrācijas paroles.
-
-Bez Compose var izmantot to pašu Dockerfile:
-
-```powershell
-docker build -t onlycats .
-docker run -d --name onlycats --env-file .env -p 8080:3000 -v onlycats_data:/app/backend/data -v onlycats_uploads:/app/backend/uploads onlycats
-docker exec onlycats npm run db:seed
-```
 
 ## Vides mainīgie, API adrese un CORS
 
 Docker palaišanai izmantojiet saknes `.env`, lokālajam backend — `backend/.env`.
 
-| Mainīgais          | Piemērs                                | Pielietojums                                                            |
-| ------------------ | -------------------------------------- | ----------------------------------------------------------------------- |
-| `JWT_SECRET`       | Nejauša virkne ar vismaz 32 rakstzīmēm | Sesiju parakstīšana                                                     |
-| `FRONTEND_URL`     | `http://localhost:8080`                | Publiskā vietnes adrese un PayPal atgriešanās saites                    |
-| `API_URL`          | `/api`                                 | API bāzes adrese Vue klientam; var norādīt `https://api.example.lv/api` |
-| `CORS_ORIGIN`      | `http://localhost:8080`                | Atļautā pārlūka izcelsme; vairākas adreses atdala ar komatu             |
-| `DATABASE_URL`     | `file:./data/onlycats.db`              | SQLite fails; konteinerā izmanto absolūtu ceļu                          |
-| `COOKIE_SAME_SITE` | `lax`                                  | Sesijas sīkdatnes politika: `lax`, `strict` vai `none`                  |
-| `COOKIE_SECURE`    | `false`                                | `true` ļauj sīkdatni pārsūtīt tikai ar HTTPS                            |
-| `PORT`             | `3000`                                 | Porta numurs konteinera iekšienē                                        |
-| `FRONTEND_DIST`    | `/app/frontend/dist`                   | Vue būvējuma mape; Dockerfile to iestata automātiski                    |
+| Mainīgais          | Piemērs                                                  | Pielietojums                                                            |
+| ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `JWT_SECRET`       | Nejauša virkne ar vismaz 32 rakstzīmēm                   | Sesiju parakstīšana                                                     |
+| `FRONTEND_URL`     | `http://localhost:8080`                                  | Publiskā vietnes adrese un PayPal atgriešanās saites                    |
+| `API_URL`          | `/api`                                                   | API bāzes adrese Vue klientam; var norādīt `https://api.example.lv/api` |
+| `CORS_ORIGIN`      | `http://localhost:8080`                                  | Atļautā pārlūka izcelsme; vairākas adreses atdala ar komatu             |
+| `DATABASE_URL`     | `postgresql://onlycats:password@localhost:5433/onlycats` | PostgreSQL savienojuma URL                                              |
+| `COOKIE_SAME_SITE` | `lax`                                                    | Sesijas sīkdatnes politika: `lax`, `strict` vai `none`                  |
+| `COOKIE_SECURE`    | `false`                                                  | `true` ļauj sīkdatni pārsūtīt tikai ar HTTPS                            |
+| `PORT`             | `3000`                                                   | Porta numurs konteinera iekšienē                                        |
+| `FRONTEND_DIST`    | `/app/frontend/dist`                                     | Vue būvējuma mape; Dockerfile to iestata automātiski                    |
 
 Vienā konteinerā atstājiet `API_URL=/api`: pārlūks izmanto to pašu domēnu un
 portu. Ārējai API adresei jābūt sasniedzamai no lietotāja pārlūka; Docker servisa
@@ -97,7 +89,7 @@ ar `API_URL=/api` ļauj izmantot noklusējuma `lax` politiku.
 ## Palaišana bez Docker
 
 Nepieciešams Node.js 22.12+ (ieteicams Node 22 LTS) un npm.
-SQLite glabā datus failā `backend/data/onlycats.db`.
+PostgreSQL glabā datus un augšupielādētos fotoattēlus serverī.
 
 ```powershell
 npm ci
@@ -122,7 +114,7 @@ izveidojiet `frontend/.env` pēc `frontend/.env.example` un iestatiet `VITE_API_
 Šo Vite mainīgo nolasa izstrādes servera palaišanas vai būvēšanas laikā;
 Docker vidē lietojiet izpildlaika `API_URL`.
 
-SQLite fails tiek izveidots ar `npm run db:migrate`. Komandas palaidiet no
+PostgreSQL shēma tiek sagatavota ar `npm run db:migrate`. Komandas palaidiet no
 projekta saknes, izmantojot npm skriptus. Lai izveidotu rezerves kopiju,
 apturiet backend un nokopējiet datubāzes failu un augšupielādētos fotoattēlus.
 
@@ -183,3 +175,8 @@ Katalogā un plūsmā ir ne vairāk kā 100 ierakstu.
 
 Docker konfigurācija paredzēta lokālai demonstrācijai. Publiskai izvietošanai
 vajadzīgs HTTPS, rezerves kopijas, atsevišķi noslēpumi un datu glabātuves uzturēšana.
+
+## Savas fotogrāfijas
+
+Kontā atveriet kaķa redaktoru un izvēlieties savu JPEG, PNG vai WebP (līdz 8 MB). Avatāri un publikāciju fotoattēli glabājas PostgreSQL tabulas StoredImage BYTEA laukā.
+Iepriekšējās SQLite datubāzes un uploads importēšana: no backend mapes `node scripts/import-legacy.mjs data/onlycats.db`. Avota faili netiek dzēsti; importējiet pirms seed, lai saglabātu esošos ierakstus. PostgreSQL iepriekšējiem failu fotoattēliem var palaist to pašu skriptu bez argumenta.

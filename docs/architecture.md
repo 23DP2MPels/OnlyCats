@@ -3,9 +3,9 @@
 ```mermaid
 flowchart LR
   Browser[Vue 3 pārlūkā] --> API[NestJS: Vue faili un API]
-  API --> ORM[Prisma + better-sqlite3 adapteris]
-  ORM --> DB[(SQLite: data/onlycats.db)]
-  API --> Files[Slēgta uploads mape]
+  API --> ORM[Prisma + pg adapteris]
+  ORM --> DB[(PostgreSQL)]
+  DB --> Images[StoredImage: BYTEA]
   API --> PayPal[PayPal Sandbox]
   PayPal --> Webhook[Tīmekļa aizķere: paraksta pārbaude]
   Webhook --> API
@@ -40,8 +40,7 @@ Galvenās tabulas: User → Cat → Post; User → Subscription ← Cat; Webhook
 Pāris userId/catId un paypalId ir unikāli. paidUntil ierobežo piekļuvi arī tad,
 ja paziņojums par abonementa beigām nav saņemts. Atcelšana uzreiz pārtrauc piekļuvi.
 
-SQLite fails ir `backend/data/onlycats.db`. Prisma CLI, API un sākotnējo datu
-skripts izmanto vienu absolūto ceļu no `DATABASE_URL`. Konteinerā datubāzi
-saglabā sējumā `sqlite_data`, fotoattēlus — sējumā `uploads`.
+PostgreSQL glabā lietotāju datus un fotoattēlus tabulā `StoredImage` (BYTEA).
+Datubāzes savienojumu norāda `DATABASE_URL`; Compose saglabā to sējumā `postgres_data`.
 `API_URL` nonāk Vue klientā ar `/runtime-config.js`; publiskajā konfigurācijā
 netiek iekļauti servera noslēpumi.

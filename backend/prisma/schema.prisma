@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum Role {
@@ -99,4 +99,10 @@ model Subscription {
 model WebhookEvent {
   id          String   @id
   processedAt DateTime @default(now())
+}
+
+model StoredImage {
+  id String @id @default(uuid())
+  data Bytes
+  createdAt DateTime @default(now())
 }

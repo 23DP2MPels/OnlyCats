@@ -17,9 +17,9 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/backend backend
 COPY --from=build /app/frontend/dist frontend/dist
 COPY --from=build /app/frontend/public frontend/public
-ENV NODE_ENV=production PORT=3000 FRONTEND_DIST=/app/frontend/dist DATABASE_URL=file:/app/backend/data/onlycats.db
+ENV NODE_ENV=production PORT=3000 FRONTEND_DIST=/app/frontend/dist
 WORKDIR /app/backend
-RUN mkdir -p uploads data && chown -R node:node uploads data
+RUN mkdir -p uploads && chown -R node:node uploads
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"

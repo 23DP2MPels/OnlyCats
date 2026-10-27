@@ -1,14 +1,14 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
 import sharp from 'sharp';
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { databaseUrl } from '../src/database';
 const prisma = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({
-    url: databaseUrl,
+  adapter: new PrismaPg({
+    connectionString: databaseUrl,
   }),
 });
 async function main() {
@@ -71,8 +71,6 @@ async function main() {
       avatar: 'mochi',
     },
   ];
-  const uploads = resolve(process.env.UPLOAD_DIR || './uploads');
-  await mkdir(uploads, { recursive: true });
   for (let i = 0; i < cats.length; i++) {
     const { avatar, ...cat } = cats[i];
     const asset = ['marmalade', 'luna'].includes(avatar)
@@ -97,10 +95,14 @@ async function main() {
     const source = await readFile(resolve('../frontend/public/cats', asset));
     for (let j = 0; j < 2; j++) {
       const imageKey = `seed-${avatar}-${j}.jpg`;
-      await writeFile(
-        resolve(uploads, imageKey),
-        await sharp(source).jpeg({ quality: 90 }).toBuffer(),
-      );
+      await prisma.storedImage.upsert({
+        where: { id: imageKey },
+        update: {},
+        create: {
+          id: imageKey,
+          data: await sharp(source).jpeg({ quality: 90 }).toBuffer(),
+        },
+      });
       const postId = `55555555-5555-4555-8${i}55-55555555555${j}`;
       await prisma.post.upsert({
         where: { id: postId },

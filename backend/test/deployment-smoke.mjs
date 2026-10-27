@@ -1,4 +1,4 @@
-// Run against a built API serving FRONTEND_DIST, with a disposable SQLite database.
+// Run against a built API serving FRONTEND_DIST, with a disposable PostgreSQL database.
 import assert from 'node:assert/strict';
 import { runInNewContext } from 'node:vm';
 
