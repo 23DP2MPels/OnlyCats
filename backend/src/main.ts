@@ -14,13 +14,22 @@ import { AuthGuard, OptionalAuthGuard } from './auth';
 import { PaypalService } from './paypal.service';
 import { SubscriptionsService } from './subscriptions.service';
 import { config, validateConfig } from './config';
+import { EarningsService } from './earnings.service';
+import { CreatorController } from './creator.controller';
+import { AccountController } from './account.controller';
 
 @Module({
-  controllers: [ApiController, SocialController],
+  controllers: [
+    ApiController,
+    SocialController,
+    CreatorController,
+    AccountController,
+  ],
   providers: [
     PrismaService,
     PaypalService,
     SubscriptionsService,
+    EarningsService,
     AuthGuard,
     OptionalAuthGuard,
   ],
@@ -30,6 +39,8 @@ class AppModule {}
 async function bootstrap() {
   validateConfig();
   const app = await NestFactory.create(AppModule);
+  if (config.trustProxy)
+    app.getHttpAdapter().getInstance().set('trust proxy', config.trustProxy);
   app.setGlobalPrefix('api');
   const apiOrigin = config.apiUrl.startsWith('http')
     ? new URL(config.apiUrl).origin

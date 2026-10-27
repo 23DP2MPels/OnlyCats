@@ -42,3 +42,15 @@ export class SubscribeDto {
 export class CommentDto {
   @IsString() @Length(1, 1000) @Matches(/\S/) body!: string;
 }
+
+export class WithdrawalDto {
+  @IsString({
+    message: 'Укажите положительную сумму в USD с точностью до цента',
+  })
+  @Matches(/^(?:0|[1-9]\d{0,6})(?:\.\d{1,2})?$/, {
+    message: 'Укажите положительную сумму в USD с точностью до цента',
+  })
+  amount!: string;
+
+  @IsUUID() requestId!: string;
+}

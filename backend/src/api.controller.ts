@@ -14,6 +14,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
@@ -69,6 +70,7 @@ export class ApiController {
   @Post('auth/register') async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ) {
     if (Buffer.byteLength(dto.password, 'utf8') > 72)
       throw new BadRequestException('Пароль должен занимать не более 72 байт');
@@ -78,6 +80,9 @@ export class ApiController {
           email: dto.email.trim().toLowerCase(),
           name: dto.name.trim(),
           passwordHash: await bcrypt.hash(dto.password, 12),
+          loginEvents: {
+            create: { kind: 'REGISTER', ...this.loginMetadata(req) },
+          },
         },
         select: publicUser,
       });
@@ -96,6 +101,7 @@ export class ApiController {
   @Post('auth/login') @HttpCode(200) async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email.trim().toLowerCase() },
@@ -114,8 +120,35 @@ export class ApiController {
       name: user.name,
       role: user.role,
     };
+    await this.prisma.loginEvent.create({
+      data: { userId: user.id, kind: 'LOGIN', ...this.loginMetadata(req) },
+    });
     this.setSession(res, safe);
     return safe;
+  }
+  private loginMetadata(req: Request) {
+    // Forwarded addresses are honored only when Express trust proxy is explicitly configured.
+    return {
+      ipAddress: req.ip || req.socket.remoteAddress || null,
+      userAgent: req.get('user-agent')?.slice(0, 512) || null,
+    };
+  }
+
+  @Get('account/login-history') @UseGuards(AuthGuard) async loginHistory(
+    @CurrentUser() user: SessionUser,
+  ) {
+    return this.prisma.loginEvent.findMany({
+      where: { userId: user.id },
+      select: {
+        id: true,
+        kind: true,
+        ipAddress: true,
+        userAgent: true,
+        createdAt: true,
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 50,
+    });
   }
   @Post('auth/logout') @HttpCode(200) logout(
     @Res({ passthrough: true }) res: Response,
@@ -450,6 +483,23 @@ export class ApiController {
         createdAt: true,
         _count: { select: { cats: true, subscriptions: true } },
       },
+      take: 100,
+    });
+  }
+  @Get('admin/withdrawals') @UseGuards(AuthGuard) async adminWithdrawals(
+    @CurrentUser() user: SessionUser,
+  ) {
+    if (user.role !== 'ADMIN') throw new ForbiddenException();
+    return this.prisma.withdrawalRequest.findMany({
+      select: {
+        id: true,
+        amountCents: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+        owner: { select: publicUser },
+      },
+      orderBy: { createdAt: 'desc' },
       take: 100,
     });
   }

@@ -55,3 +55,32 @@ Datus mainošiem pārlūka pieprasījumiem Origin papildus pārbauda serverī.
 ## Kaķa fotogrāfija
 
 POST `/api/cats/:id/avatar`: īpašnieka multipart `file`, JPEG/PNG/WebP līdz 8 MB. Atgriež `{avatar}`. GET `/api/cats/:id/avatar` publiski izsniedz JPEG. Augšupielādes tiek validētas un pārkodētas, glabātas PostgreSQL `StoredImage.data` (BYTEA). Privāto publikāciju attēlu GET joprojām pārbauda abonementu.
+
+## Ienākumi un izmaksu pieprasījumi
+
+Visiem `/creator` maršrutiem vajadzīga sesija; ownerId serveris iegūst no tās.
+Summas atbildēs ir veseli USD centi. Pieprasījumi nepārskaita naudu.
+
+| Metode | Maršruts                 | Pielietojums                                                                                            |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| GET    | /creator/earnings        | receivedCents, reservedCents, availableCents, payments, withdrawals; sandbox=true, payoutsEnabled=false |
+| POST   | /creator/earnings/sync   | Ielasa sava satura PayPal maksājumus un atgriež kopsavilkumu                                            |
+| POST   | /creator/withdrawals     | JSON: amount kā decimālvirkne, piemēram, "2.50", un requestId kā UUID; atgriež id, status, amountCents  |
+| DELETE | /creator/withdrawals/:id | Atceļ savu pieprasījumu un atbrīvo rezervāciju                                                          |
+| GET    | /admin/withdrawals       | Tikai ADMIN; pēdējie 100 pieprasījumi ar īpašnieka publiskajiem datiem                                  |
+
+Nepietiekamam atlikumam vai nederīgai summai atgriež 400; requestId konfliktam —
+409; svešam vai neesošam atceļamajam pieprasījumam — 404. Pamatnoteikumi un
+vēstures ierobežojumi aprakstīti [ienākumu dokumentācijā](earnings.md).
+
+## Profila vēsture
+
+| Metode | Maršruts                   | Pielietojums                                                                                                               |
+| ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET    | /account/login-history     | Sesija; savas pēdējās 50 veiksmīgās pieteikšanās ar id, kind, ipAddress, userAgent, createdAt                              |
+| GET    | /account/transactions      | Sesija; savas pēdējās 100 transakcijas ar amountCents, currency, status, paidAt, cat.name un direction: INCOME vai EXPENSE |
+| POST   | /account/transactions/sync | Sesija; ielasa savus PayPal maksājumus un ienākumus, atgriež transakciju vēsturi                                           |
+
+Lietotāja identifikatoru vienmēr iegūst no sesijas; klienta userId vai ownerId
+parametrs nemaina atlasi. Atbildes nesatur paroles, sesiju žetonus vai citu
+lietotāju maksājumu rekvizītus. [IP uzticamība un vēstures robežas](profile.md).
