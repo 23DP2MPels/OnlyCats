@@ -2,6 +2,15 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { config } from './config';
 import { PaypalDetails } from './access';
 
+export type PaypalTransaction = {
+  id: string;
+  status: string;
+  time: string;
+  amount_with_breakdown: {
+    gross_amount: { value: string; currency_code: string };
+  };
+};
+
 @Injectable()
 export class PaypalService {
   private token?: { value: string; expires: number };
@@ -100,6 +109,54 @@ export class PaypalService {
       `/v1/billing/subscriptions/${encodeURIComponent(id)}`,
     );
   }
+  async transactions(id: string, since: Date) {
+    const transactions: PaypalTransaction[] = [];
+    const end = Date.now();
+    // Small date windows also support subscriptions older than six months.
+    for (let start = since.getTime() - 1000; start < end;) {
+      const stop = Math.min(start + 180 * 86400000, end);
+      const query = new URLSearchParams({
+        start_time: new Date(start).toISOString(),
+        end_time: new Date(stop).toISOString(),
+      });
+      const endpoint = `/v1/billing/subscriptions/${encodeURIComponent(id)}/transactions`;
+      let path: string | undefined = `${endpoint}?${query}`;
+      const seen = new Set<string>();
+      while (path) {
+        if (seen.has(path) || seen.size >= 100)
+          throw new ServiceUnavailableException(
+            'Не удалось загрузить историю PayPal',
+          );
+        seen.add(path);
+        const page: {
+          transactions: PaypalTransaction[];
+          links?: { rel: string; href: string }[];
+        } = await this.request(path);
+        if (!Array.isArray(page.transactions))
+          throw new ServiceUnavailableException(
+            'Не удалось загрузить историю PayPal',
+          );
+        transactions.push(...page.transactions);
+        const next = page.links?.find((link) => link.rel === 'next');
+        path = undefined;
+        if (next) {
+          const url = new URL(next.href, config.paypal.baseUrl + '/');
+          const expected = new URL(`${config.paypal.baseUrl}${endpoint}`);
+          if (
+            url.origin !== expected.origin ||
+            url.pathname !== expected.pathname
+          )
+            throw new ServiceUnavailableException(
+              'Некорректная страница PayPal',
+            );
+          path = endpoint + url.search;
+        }
+      }
+      start = stop;
+    }
+    return transactions;
+  }
+
   cancel(id: string) {
     return this.request(
       `/v1/billing/subscriptions/${encodeURIComponent(id)}/cancel`,

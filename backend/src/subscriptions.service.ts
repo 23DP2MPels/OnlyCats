@@ -10,12 +10,14 @@ import { PrismaService } from './prisma.service';
 import { PaypalService } from './paypal.service';
 import { config } from './config';
 import { hasPaidAccess, verifiedSubscriptionState } from './access';
+import { EarningsService } from './earnings.service';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly paypal: PaypalService,
+    private readonly earnings: EarningsService,
   ) {}
 
   async checkout(userId: string, catId: string) {
@@ -50,6 +52,7 @@ export class SubscriptionsService {
         this.validateApproval(approval);
         return { approvalUrl: approval, id: sub.id };
       } else if (['CANCELLED', 'EXPIRED'].includes(remote.status)) {
+        await this.earnings.syncPayments(sub, remote);
         const reset = await this.prisma.subscription.updateMany({
           where: { id: sub.id, updatedAt: sub.updatedAt },
           data: {
@@ -119,6 +122,7 @@ export class SubscriptionsService {
       where: { id, updatedAt: sub.updatedAt },
       data: state,
     });
+    await this.earnings.syncPayments(sub, details);
     return this.prisma.subscription.findUnique({
       where: { id },
       include: { cat: true },

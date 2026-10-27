@@ -49,5 +49,13 @@ Visi pieprasījumi saņēma atbildi.
 PostgreSQL datubāzi, tostarp atkārtota noformēšana, īpašumtiesības, nederīga paraksta
 noraidīšana, atkārtotu tīmekļa aizķeru atpazīšana, aktivizācija un atkārtota atcelšana.
 PayPal simulācijas daļa apkalpoja visus pieprasījumus pakalpojuma sniedzējam.
-Šis ir vēsturiskais pārbaudes rezultāts; pašreizējā lietotne izmanto SQLite.
+Šis ir vēsturiskais pārbaudes rezultāts; pašreizējā lietotne izmanto PostgreSQL.
+
+2026-10-28: `npm run test:earnings -w backend` pārbaudīja īstu NestJS API un
+atsevišķu PostgreSQL datubāzi. PayPal simulācijas daļa apkalpoja OAuth,
+abonementus, transakciju vēsturi, paraksta pārbaudi un atcelšanu; tā apkalpoja
+visus ārējos pieprasījumus, neviena daļa nepalika neizmantota. Ienākumu tests
+apstiprināja atkārtotu maksājumu atpazīšanu, rezervācijas konkurenci, īpašnieku
+izolāciju, atmaksu izslēgšanu un atlikuma saglabāšanu pie PayPal 503 atbildes.
+Izmaksu galapunkts nav modelēts vai izsaukts. Īsti Sandbox konti netika izmantoti.
 <!-- end:observations -->

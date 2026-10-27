@@ -10,6 +10,8 @@ http
     };
     const records = (await pm.state.get('paypal.subscriptions')) || {};
     const keys = (await pm.state.get('paypal.idempotency')) || {};
+    const payments = (await pm.state.get('paypal.transactions')) || {};
+    const failures = (await pm.state.get('paypal.transactionFailures')) || {};
     const body = req.body || {};
     if (req.method === 'POST' && path === '/v1/oauth2/token')
       return send(200, {
@@ -44,6 +46,29 @@ http
       await pm.state.set('paypal.subscriptions', records);
       await pm.state.set('paypal.idempotency', keys);
       return send(201, records[id]);
+    }
+    const transactionMatch =
+      /^\/v1\/billing\/subscriptions\/([^/]+)\/transactions$/.exec(path);
+    if (req.method === 'GET' && transactionMatch) {
+      const id = transactionMatch[1];
+      if (!records[id]) return send(404, { name: 'RESOURCE_NOT_FOUND' });
+      if (failures[id]) return send(503, { name: 'SERVICE_UNAVAILABLE' });
+      const query = new URL(req.url, 'http://localhost').searchParams;
+      if (!query.has('start_time') || !query.has('end_time'))
+        return send(400, { name: 'INVALID_REQUEST' });
+      const start = new Date(query.get('start_time')).getTime();
+      const end = new Date(query.get('end_time')).getTime();
+      const transactions = (payments[id] || []).filter(
+        (p) =>
+          new Date(p.time).getTime() >= start &&
+          new Date(p.time).getTime() <= end,
+      );
+      return send(200, {
+        transactions,
+        total_items: transactions.length,
+        total_pages: 1,
+        links: [],
+      });
     }
     const match = /^\/v1\/billing\/subscriptions\/([^/]+)(\/cancel)?$/.exec(
       path,
@@ -83,7 +108,45 @@ http
         },
       });
       await pm.state.set('paypal.subscriptions', records);
+      payments[body.id] = payments[body.id] || [
+        {
+          id: `TX-${body.id}-1`,
+          status: 'COMPLETED',
+          time: new Date().toISOString(),
+          amount_with_breakdown: {
+            gross_amount: { value: '5.00', currency_code: 'USD' },
+          },
+        },
+      ];
+      await pm.state.set('paypal.transactions', payments);
       return send(200, records[body.id]);
+    }
+    if (req.method === 'POST' && path === '/__test/payment') {
+      if (!records[body.subscriptionId])
+        return send(404, { name: 'RESOURCE_NOT_FOUND' });
+      const list = payments[body.subscriptionId] || [];
+      const payment = {
+        id: body.id,
+        status: body.status || 'COMPLETED',
+        time: body.time || new Date().toISOString(),
+        amount_with_breakdown: {
+          gross_amount: {
+            value: body.amount || '5.00',
+            currency_code: body.currency || 'USD',
+          },
+        },
+      };
+      const index = list.findIndex((p) => p.id === body.id);
+      if (index < 0) list.push(payment);
+      else list[index] = payment;
+      payments[body.subscriptionId] = list;
+      await pm.state.set('paypal.transactions', payments);
+      return send(200, payment);
+    }
+    if (req.method === 'POST' && path === '/__test/transaction-failure') {
+      failures[body.id] = Boolean(body.enabled);
+      await pm.state.set('paypal.transactionFailures', failures);
+      return send(200, { enabled: failures[body.id] });
     }
     return send(501, { name: 'ENDPOINT_NOT_MODELLED' });
   })

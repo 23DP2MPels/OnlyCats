@@ -37,6 +37,9 @@ atļauto izcelsmju sarakstu. Tiek pārbaudīti DTO tipi un objektu īpašumties�
 Paroles jauc ar bcrypt. JWT, PayPal noslēpumi un lokālie .env faili nav iekļauti Git.
 
 Galvenās tabulas: User → Cat → Post; User → Subscription ← Cat; WebhookEvent.
+OwnerPayment saglabā unikālus PayPal maksājumus, WithdrawalRequest — rezervētus
+izmaksu pieprasījumus bez īstas naudas pārskaitīšanas, LoginEvent — veiksmīgo
+pieteikšanos metadatus. Vēstures maršruti atlasa tikai pašreizējā lietotāja datus.
 Pāris userId/catId un paypalId ir unikāli. paidUntil ierobežo piekļuvi arī tad,
 ja paziņojums par abonementa beigām nav saņemts. Atcelšana uzreiz pārtrauc piekļuvi.
 

@@ -5,6 +5,7 @@ import { PrismaService } from '../src/prisma.service';
 import { PaypalService } from '../src/paypal.service';
 import { SubscriptionsService } from '../src/subscriptions.service';
 import { hasPaidAccess } from '../src/access';
+import { EarningsService } from '../src/earnings.service';
 
 async function main() {
   config.paypal.baseUrl = 'http://127.0.0.1:4900/paypal';
@@ -16,7 +17,11 @@ async function main() {
   });
   const prisma = new PrismaService();
   const paypal = new PaypalService();
-  const service = new SubscriptionsService(prisma, paypal);
+  const service = new SubscriptionsService(
+    prisma,
+    paypal,
+    new EarningsService(prisma, paypal),
+  );
   const user = await prisma.user.create({
     data: {
       email: `simulation-${randomUUID()}@onlycats.test`,
@@ -69,9 +74,12 @@ async function main() {
     assert.equal(hasPaidAccess(await service.cancel(user.id, sub.id)), false);
     assert.equal((await service.cancel(user.id, sub.id)).status, 'CANCELLED');
     console.log(
-      'Subscription integration passed: real SQLite + PayPal HTTP simulation, repeated checkout, ownership, invalid signature, duplicate webhook, paid access and idempotent cancellation.',
+      'Subscription integration passed: real PostgreSQL + PayPal HTTP simulation, repeated checkout, ownership, invalid signature, duplicate webhook, paid access and idempotent cancellation.',
     );
   } finally {
+    await prisma.ownerPayment.deleteMany({
+      where: { subscription: { userId: user.id } },
+    });
     await prisma.webhookEvent.deleteMany({ where: { id: eventId } });
     await prisma.subscription.deleteMany({ where: { userId: user.id } });
     await prisma.user.delete({ where: { id: user.id } });

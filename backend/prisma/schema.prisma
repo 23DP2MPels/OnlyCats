@@ -30,6 +30,9 @@ model User {
   subscriptions Subscription[]
   likes         Like[]
   comments      Comment[]
+  earnings      OwnerPayment[]
+  withdrawals   WithdrawalRequest[]
+  loginEvents   LoginEvent[]
 }
 
 model Cat {
@@ -43,6 +46,7 @@ model Cat {
   createdAt   DateTime       @default(now())
   posts       Post[]
   subscriptions Subscription[]
+  earnings      OwnerPayment[]
   @@index([ownerId])
 }
 
@@ -93,6 +97,7 @@ model Subscription {
   paidUntil    DateTime?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
+  payments     OwnerPayment[]
   @@unique([userId, catId])
 }
 
@@ -105,4 +110,51 @@ model StoredImage {
   id String @id @default(uuid())
   data Bytes
   createdAt DateTime @default(now())
+}
+
+enum WithdrawalStatus {
+  PENDING
+  CANCELLED
+}
+
+model OwnerPayment {
+  id                    String @id @default(uuid())
+  paypalTransactionId   String @unique
+  paypalSubscriptionId  String
+  subscriptionId        String
+  subscription          Subscription @relation(fields: [subscriptionId], references: [id])
+  ownerId               String
+  owner                 User @relation(fields: [ownerId], references: [id])
+  catId                 String
+  cat                   Cat @relation(fields: [catId], references: [id])
+  amountCents           Int
+  currency              String @default("USD")
+  status                String
+  paidAt                DateTime
+  createdAt             DateTime @default(now())
+  @@index([ownerId, paidAt])
+}
+
+model WithdrawalRequest {
+  id          String @id @default(uuid())
+  requestId   String @unique
+  ownerId     String
+  owner       User @relation(fields: [ownerId], references: [id])
+  amountCents Int
+  currency    String @default("USD")
+  status      WithdrawalStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([ownerId, createdAt])
+}
+
+model LoginEvent {
+  id          String @id @default(uuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind        String
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  @@index([userId, createdAt])
 }

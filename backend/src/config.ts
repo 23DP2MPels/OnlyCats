@@ -2,6 +2,11 @@ import 'dotenv/config';
 
 export const config = {
   port: Number(process.env.PORT || 3000),
+  trustProxy: process.env.TRUST_PROXY
+    ? process.env.TRUST_PROXY.split(',')
+        .map((value) => value.trim())
+        .filter(Boolean)
+    : false,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   apiUrl: process.env.API_URL || '/api',
   frontendDist: process.env.FRONTEND_DIST,

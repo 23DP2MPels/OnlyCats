@@ -167,6 +167,13 @@ jāpārbauda sava daļa. GitHub izmaiņu pieprasījumu un koda pārskatīšanas 
 
 ## Mācību MVP ierobežojumi
 
+Konta cilnēs “Iestatījumi” un “Transakcijas” pieejama veiksmīgo pieteikšanos
+vēsture un savu PayPal maksājumu un ienākumu vēsture. [Profila apraksts](docs/profile.md).
+
+Īpašnieka kontā ir ienākumu cilne ar apstiprinātiem Sandbox maksājumiem,
+rezervācijām un izmaksu pieprasījumu vēsturi. Pieprasījumus var iesniegt un
+atcelt; reāla nauda netiek pārskaitīta. [Uzskaites noteikumi](docs/earnings.md).
+
 Tiek izmantots viens pārdevēja konts un kopīgs mēneša tarifs. Nav izmaksu
 īpašniekiem, atmaksu, tarifu maiņas, paroles atjaunošanas, e-pasta apstiprināšanas
 un atsevišķas moderatora saskarnes. Atcelšana uzreiz pārtrauc piekļuvi.
