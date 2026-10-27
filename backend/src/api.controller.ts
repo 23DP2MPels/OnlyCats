@@ -62,8 +62,8 @@ export class ApiController {
   private setSession(res: Response, user: SessionUser) {
     res.cookie('onlycats_session', sessionToken(user), {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: config.frontendUrl.startsWith('https://'),
+      sameSite: config.cookieSameSite,
+      secure: config.cookieSecure,
       maxAge: 7 * 86400000,
       path: '/',
     });
@@ -137,9 +137,9 @@ export class ApiController {
       where: search
         ? {
             OR: [
-              { name: { contains: search.slice(0, 100), mode: 'insensitive' } },
+              { name: { contains: search.slice(0, 100) } },
               {
-                breed: { contains: search.slice(0, 100), mode: 'insensitive' },
+                breed: { contains: search.slice(0, 100) },
               },
             ],
           }

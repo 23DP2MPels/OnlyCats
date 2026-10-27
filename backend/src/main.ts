@@ -5,7 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import { resolve } from 'node:path';
 import { ApiController } from './api.controller';
 import { SocialController } from './social.controller';
 import { PrismaService } from './prisma.service';
@@ -30,9 +31,25 @@ async function bootstrap() {
   validateConfig();
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
-  app.use(helmet());
+  const apiOrigin = config.apiUrl.startsWith('http')
+    ? new URL(config.apiUrl).origin
+    : "'self'";
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: {
+        directives: {
+          connectSrc: ["'self'", apiOrigin],
+          imgSrc: ["'self'", 'data:', apiOrigin],
+          upgradeInsecureRequests: config.frontendUrl.startsWith('https://')
+            ? []
+            : null,
+        },
+      },
+    }),
+  );
   app.use(cookieParser());
-  app.enableCors({ origin: config.frontendUrl, credentials: true });
+  app.enableCors({ origin: config.corsOrigins, credentials: true });
   app.use(
     '/api/auth',
     rateLimit({
@@ -47,7 +64,7 @@ async function bootstrap() {
     if (
       !['GET', 'HEAD', 'OPTIONS'].includes(req.method) &&
       req.headers.origin &&
-      req.headers.origin !== config.frontendUrl
+      !config.corsOrigins.includes(req.headers.origin)
     ) {
       res.status(403).json({ message: 'Недопустимый источник запроса' });
       return;
@@ -67,12 +84,29 @@ async function bootstrap() {
     app,
     new DocumentBuilder()
       .setTitle('OnlyCats API')
-      .setDescription('Учебный проект. Все платежи — PayPal Sandbox.')
+      .setDescription(
+        'Mācību projekts. Visi maksājumi notiek PayPal Sandbox vidē.',
+      )
       .setVersion('0.1.0')
       .addCookieAuth('onlycats_session')
       .build(),
   );
   SwaggerModule.setup('api/docs', app, doc);
+  const server = app.getHttpAdapter().getInstance();
+  server.get('/runtime-config.js', (_req: Request, res: Response) => {
+    res
+      .type('application/javascript')
+      .send(
+        `window.__ONLYCATS_CONFIG__ = ${JSON.stringify({ apiUrl: config.apiUrl }).replaceAll('<', '\\u003c')};`,
+      );
+  });
+  if (config.frontendDist) {
+    const frontendDist = resolve(config.frontendDist);
+    server.use(express.static(frontendDist, { index: false }));
+    server.get(/^(?!\/api(?:\/|$)).*/, (_req: Request, res: Response) => {
+      res.sendFile(resolve(frontendDist, 'index.html'));
+    });
+  }
   await app.listen(config.port, '0.0.0.0');
 }
 bootstrap().catch((error) => {

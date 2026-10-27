@@ -1,43 +1,53 @@
 # HTTP API
 
-Социальные маршруты: `GET /feed?scope=all|subscriptions&cursor=UUID` — лента
-по 20 записей с nextCursor; `PUT /posts/:id/like` и `DELETE /posts/:id/like` —
-идемпотентный лайк/снятие лайка; `GET /posts/:id/comments` — последние 50
-комментариев; `POST /posts/:id/comments` — JSON `{ "body": "..." }`, до 1000
-символов. Создание реакций требует сессии. Для приватного поста комментарии и
-лайки дополнительно требуют доступа к публикации. Лента не выдаёт закрытые
-тексты, изображения, ключи файлов или списки подписок других пользователей.
+Prefikss ir `/api`. Pieprasījumi izmanto JSON, izņemot attēla augšupielādi ar multipart.
+Sesija glabājas sīkdatnē `onlycats_session`; pārlūks izmanto `credentials: include`.
+Swagger apraksts pieejams `/api/docs`, JSON apraksts — `/api/docs-json`.
+Ievaddatu shēmas definētas failā `backend/src/dto.ts`.
 
-Префикс `/api`. JSON-запросы, кроме multipart для изображения.
-Сессия — cookie `onlycats_session`, браузер передаёт `credentials: include`.
-Описание маршрутов Swagger доступно по `/api/docs`, JSON — `/api/docs-json`.
-Схемы входных данных определены в `backend/src/dto.ts`.
+Sociālā plūsma atgriež pa 20 ierakstiem ar `nextCursor`; `scope=all` izvēlas visu
+plūsmu, bet `scope=subscriptions` — abonēto kaķu saturu. Atzīmes “Patīk”
+pievienošana un noņemšana ir idempotenta. Komentāru sarakstā ir pēdējie 50
+komentāri; jauna komentāra JSON `{ "body": "..." }` var saturēt līdz 1000 rakstzīmēm.
+Reakciju izveidei vajadzīga sesija. Privātu publikāciju komentāriem un atzīmēm
+papildus vajadzīgas piekļuves tiesības. Plūsma neatklāj slēptus tekstus, attēlus,
+failu atslēgas vai citu lietotāju abonementu sarakstus.
 
-| Метод  | Маршрут                          | Доступ / назначение                                           |
-| ------ | -------------------------------- | ------------------------------------------------------------- |
-| GET    | /health                          | Состояние БД и настройки Sandbox                              |
-| POST   | /auth/register                   | email, name, password (10–72 символа, не более 72 UTF-8 байт) |
-| POST   | /auth/login                      | email, password; устанавливает cookie                         |
-| POST   | /auth/logout                     | Удаляет cookie                                                |
-| GET    | /auth/me                         | Публичные данные текущего пользователя или null               |
-| GET    | /cats?search=                    | Каталог, до 100 котов                                         |
-| GET    | /cats/:id                        | Профиль и признаки isOwner/subscribed                         |
-| POST   | /cats                            | Сессия; name, breed, bio, необязательный avatar               |
-| PATCH  | /cats/:id                        | Владелец/ADMIN; те же поля целиком                            |
-| GET    | /cats/:id/posts                  | До 100 публикаций; приватные поля скрываются                  |
-| POST   | /cats/:id/posts                  | Владелец/ADMIN; title, body, isPrivate                        |
-| PATCH  | /posts/:id                       | Владелец/ADMIN; title, body, isPrivate                        |
-| DELETE | /posts/:id                       | Владелец/ADMIN; удаляет публикацию и фото                     |
-| POST   | /posts/:id/image                 | Владелец/ADMIN; multipart file, до 8 МБ                       |
-| GET    | /posts/:id/image                 | Права проверяются на каждый запрос                            |
-| GET    | /account                         | Сессия; свои коты и подписки                                  |
-| POST   | /subscriptions                   | Сессия; catId; возвращает approvalUrl                         |
-| POST   | /subscriptions/confirm/:paypalId | Подтверждение своей подписки через PayPal                     |
-| POST   | /subscriptions/:id/sync          | Получить актуальное состояние своей подписки                  |
-| DELETE | /subscriptions/:id               | Отмена своей подписки                                         |
-| POST   | /payments/paypal/webhook         | Проверенная подпись PayPal, повторная доставка допустима      |
-| GET    | /admin/users                     | Только ADMIN; без хешей паролей                               |
+| Metode | Maršruts                         | Piekļuve un pielietojums                                             |
+| ------ | -------------------------------- | -------------------------------------------------------------------- |
+| GET    | /health                          | Datubāzes stāvoklis un Sandbox iestatījumi                           |
+| POST   | /auth/register                   | email, name, password: 10–72 rakstzīmes, ne vairāk kā 72 UTF-8 baiti |
+| POST   | /auth/login                      | email, password; iestata sīkdatni                                    |
+| POST   | /auth/logout                     | Dzēš sīkdatni                                                        |
+| GET    | /auth/me                         | Pašreizējā lietotāja publiskie dati vai null                         |
+| GET    | /cats?search=                    | Katalogs ar ne vairāk kā 100 kaķiem                                  |
+| GET    | /cats/:id                        | Profils un pazīmes isOwner/subscribed                                |
+| POST   | /cats                            | Sesija; name, breed, bio un neobligāts avatar                        |
+| PATCH  | /cats/:id                        | Īpašnieks/ADMIN; visi tie paši lauki                                 |
+| GET    | /cats/:id/posts                  | Līdz 100 publikācijām; privātie lauki ir paslēpti                    |
+| POST   | /cats/:id/posts                  | Īpašnieks/ADMIN; title, body, isPrivate                              |
+| PATCH  | /posts/:id                       | Īpašnieks/ADMIN; title, body, isPrivate                              |
+| DELETE | /posts/:id                       | Īpašnieks/ADMIN; dzēš publikāciju un fotoattēlu                      |
+| POST   | /posts/:id/image                 | Īpašnieks/ADMIN; multipart lauks file, līdz 8 MB                     |
+| GET    | /posts/:id/image                 | Piekļuves tiesības pārbauda katram pieprasījumam                     |
+| GET    | /feed?scope=all&cursor=UUID      | Plūsma pa 20 ierakstiem                                              |
+| PUT    | /posts/:id/like                  | Sesija un piekļuve publikācijai; pievieno atzīmi “Patīk”             |
+| DELETE | /posts/:id/like                  | Sesija un piekļuve publikācijai; noņem atzīmi “Patīk”                |
+| GET    | /posts/:id/comments              | Piekļuve publikācijai; pēdējie 50 komentāri                          |
+| POST   | /posts/:id/comments              | Sesija un piekļuve publikācijai; body                                |
+| GET    | /account                         | Sesija; savi kaķi un abonementi                                      |
+| POST   | /subscriptions                   | Sesija; catId; atgriež approvalUrl                                   |
+| POST   | /subscriptions/confirm/:paypalId | Sava abonementa apstiprināšana, izmantojot PayPal                    |
+| POST   | /subscriptions/:id/sync          | Sava abonementa aktuālā stāvokļa iegūšana                            |
+| DELETE | /subscriptions/:id               | Sava abonementa atcelšana                                            |
+| POST   | /payments/paypal/webhook         | Pārbaudīts PayPal paraksts; pieļauj atkārtotu piegādi                |
+| GET    | /admin/users                     | Tikai ADMIN; bez paroļu jaucējvērtībām                               |
 
-Ошибки: 400 — неверные данные, 401 — нет сессии, 403 — нет прав,
-404 — объект не найден, 409 — email занят, 413 — превышен размер файла,
-503 — Sandbox не настроен или недоступен. Текст ошибки — поле `message`.
+Kļūdas: 400 — nederīgi dati, 401 — nav sesijas, 403 — nav piekļuves tiesību,
+404 — objekts nav atrasts, 409 — e-pasts jau aizņemts, 413 — pārsniegts faila
+izmērs, 503 — Sandbox nav iestatīts vai nav pieejams. Kļūdas teksts ir laukā `message`.
+
+CORS atļautās izcelsmes norāda `CORS_ORIGIN`; atbalstītas vairākas precīzas
+adreses, atdalītas ar komatu. Tiek atļauti pieprasījumi ar sīkdatnēm.
+Datus mainošiem pārlūka pieprasījumiem Origin papildus pārbauda serverī.
+`/runtime-config.js` ir publiska klienta konfigurācija un nesatur noslēpumus.
