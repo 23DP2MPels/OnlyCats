@@ -160,11 +160,6 @@ PayPal pārbaude bez piekļuves atslēgām aprakstīta [simulācijas instrukcij�
 Maksims — backend; Kirills — backend un DevOps; Mairis un Glebs — frontend.
 Papildinformācija: [komandas apraksts](docs/team.md).
 
-Komitu vēsture noformēta retrospektīvi pa posmiem no 2026. gada 15. septembra
-līdz 25. oktobrim. Datumi un autori atspoguļo saskaņoto darbu sadalījumu,
-nevis apliecina faktisko izstrādi šajās dienās. Pirms nodošanas dalībniekiem
-jāpārbauda sava daļa. GitHub izmaiņu pieprasījumu un koda pārskatīšanas datumi ir faktiskie.
-
 ## Mācību MVP ierobežojumi
 
 Konta cilnēs “Iestatījumi” un “Transakcijas” pieejama veiksmīgo pieteikšanos
