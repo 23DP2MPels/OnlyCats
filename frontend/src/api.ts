@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 import { locale } from './i18n';
+import { apiBaseUrl, apiImageUrl } from './runtime-config';
 export interface User {
   id: string;
   email: string;
@@ -43,7 +44,7 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
     ...options,
     credentials: 'include',
     headers: {
@@ -60,7 +61,21 @@ export async function api<T>(
         ? data.message.join('. ')
         : data?.message || 'Не удалось выполнить запрос',
     );
-  return data as T;
+  return mapImageUrls(data) as T;
+}
+
+function mapImageUrls(data: unknown): unknown {
+  if (Array.isArray(data)) return data.map(mapImageUrls);
+  if (data && typeof data === 'object')
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [
+        key,
+        key === 'imageUrl' && typeof value === 'string'
+          ? apiImageUrl(value)
+          : mapImageUrls(value),
+      ]),
+    );
+  return data;
 }
 export async function loadSession() {
   try {
