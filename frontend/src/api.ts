@@ -70,7 +70,7 @@ function mapImageUrls(data: unknown): unknown {
     return Object.fromEntries(
       Object.entries(data).map(([key, value]) => [
         key,
-        key === 'imageUrl' && typeof value === 'string'
+        (key === 'imageUrl' || key === 'avatar') && typeof value === 'string'
           ? apiImageUrl(value)
           : mapImageUrls(value),
       ]),

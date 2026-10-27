@@ -232,5 +232,7 @@
   "Напишите что-нибудь доброе…": "Say something kind…",
   "Отправить": "Send",
   "Войдите, чтобы оставить комментарий": "Sign in to leave a comment",
-  "Некорректные параметры ленты": "Invalid feed parameters"
+  "Некорректные параметры ленты": "Invalid feed parameters",
+  "Своя фотография кота": "Your cat photo",
+  "JPEG, PNG или WebP, до 8 МБ": "JPEG, PNG or WebP, up to 8 MB"
 }

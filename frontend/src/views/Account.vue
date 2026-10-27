@@ -28,6 +28,7 @@ const tab = ref(
     ? String(route.query.tab)
     : 'cats',
 );
+const catPhoto = ref<File | null>(null);
 const catFormOpen = ref(false);
 const editingCat = ref<string | null>(null);
 const selectedCat = ref('');
@@ -69,6 +70,7 @@ function editCat(cat?: Cat) {
       ? { name: cat.name, breed: cat.breed, bio: cat.bio, avatar: cat.avatar }
       : { name: '', breed: '', bio: '', avatar: avatars[0] },
   );
+  catPhoto.value = null;
   catFormOpen.value = true;
 }
 async function action(fn: () => Promise<void>) {
@@ -85,10 +87,20 @@ async function action(fn: () => Promise<void>) {
 }
 async function saveCat() {
   await action(async () => {
-    await api(editingCat.value ? `/cats/${editingCat.value}` : '/cats', {
-      method: editingCat.value ? 'PATCH' : 'POST',
-      body: JSON.stringify(catForm),
-    });
+    const cat = await api<Cat>(
+      editingCat.value ? `/cats/${editingCat.value}` : '/cats',
+      {
+        method: editingCat.value ? 'PATCH' : 'POST',
+        body: JSON.stringify({ ...catForm, avatar: catForm.avatar.startsWith('/cats/') ? catForm.avatar : undefined }),
+      },
+    );
+    editingCat.value = cat.id;
+    if (catPhoto.value) {
+      const form = new FormData();
+      form.append('file', catPhoto.value);
+      await api(`/cats/${cat.id}/avatar`, { method: 'POST', body: form });
+    }
+    catPhoto.value = null;
     catFormOpen.value = false;
     notice.value = 'Страница кота сохранена';
     await load();
@@ -247,6 +259,18 @@ onMounted(load);
               rows="3"
             ></textarea>
           </label>
+          <label
+            >{{ t('Своя фотография кота') }}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              @change="
+                catPhoto =
+                  ($event.target as HTMLInputElement).files?.[0] || null
+              "
+            />
+            <small>{{ t('JPEG, PNG или WebP, до 8 МБ') }}</small>
+          </label>
           <div class="avatar-picker">
             <button
               v-for="avatar in avatars"
@@ -255,7 +279,10 @@ onMounted(load);
               :class="{ selected: catForm.avatar === avatar }"
               :aria-pressed="catForm.avatar === avatar"
               :aria-label="t('Выбрать аватар')"
-              @click="catForm.avatar = avatar"
+              @click="
+                catForm.avatar = avatar;
+                catPhoto = null;
+              "
             >
               <img :src="avatar" :alt="t('Аватар кота')" />
             </button>
