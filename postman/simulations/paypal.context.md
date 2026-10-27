@@ -1,48 +1,53 @@
-# OnlyCats PayPal simulation
+# OnlyCats PayPal simulācija
 
-Created 2026-10-25 from the official PayPal Subscriptions and webhook contracts;
-see links in `docs/paypal.md`. No provider-owned mock was imported: no signed-in
-Postman workspace was used. The handler is local and maintained by this project.
+Izveidota 2026. gada 25. oktobrī pēc oficiālajām PayPal abonementu un tīmekļa
+aizķeru saskarnēm; saites ir `docs/paypal.md`. Pakalpojuma sniedzēja uzturēts
+imitācijas serveris nav importēts, un autorizēta Postman darbvieta nav izmantota.
+Apstrādātājs ir lokāls, un to uztur šis projekts.
 
-## Purpose
+## Mērķis
 
-Exercise the actual `PaypalService` HTTP client without Sandbox credentials.
-The stateful member lives in `postman/mocks/paypal/default.js`.
+Pārbaudīt īsto `PaypalService` HTTP klientu bez Sandbox piekļuves datiem.
+Stāvokli saglabājošā daļa atrodas `postman/mocks/paypal/default.js`.
 
-## Execution
+## Palaišana
 
-From the repository root, with Postman CLI 1.76+:
+No repozitorija saknes ar Postman CLI 1.76+:
 
 ```powershell
 postman simulation run postman/simulations/paypal.sim.yaml --port 4900 --output ndjson --no-history
-# In another terminal:
+# Citā terminālī:
 npm run test:paypal -w backend
-# With PostgreSQL migrated and seeded:
+# Ar migrētu SQLite datubāzi un sākotnējiem datiem:
 npm run test:subscriptions -w backend
 ```
 
-The first command must report `listening`. Stop it with Ctrl+C after the test.
-Do not commit request logs. The test prints a summary; the simulation logs
-identify all served paths.
+Pirmajai komandai jāparāda `listening`. Pēc testa apturiet to ar Ctrl+C.
+Pieprasījumu žurnālus neiekļaujiet komitos. Tests izvada kopsavilkumu,
+savukārt simulācijas žurnāli norāda visus apkalpotos ceļus.
 
-## Assumptions
+## Pieņēmumi
 
-- 2026-10-25: this is fixture-based verification, not a real Sandbox payment.
-  Browser approval, account eligibility, real signature cryptography, renewal
-  scheduling and public HTTPS webhook delivery remain unverified.
-- 2026-10-25: the local `/__test/activate` route simulates approval plus a paid
-  first period. It is not a PayPal endpoint and is absent from the application API.
-- 2026-10-25: `interceptRequests: true` is required for parsed bodies and handler
-  error containment. Unknown routes return 501 rather than pretending to exist.
+- 2026-10-25: pārbaude izmanto sagatavotus testa datus, nevis īstu Sandbox maksājumu.
+  Nav pārbaudīta apstiprināšana pārlūkā, konta atbilstība, īstā parakstu kriptogrāfija,
+  pagarinājumu grafiks un tīmekļa aizķeru piegāde publiskā HTTPS adresē.
+- 2026-10-25: lokālais maršruts `/__test/activate` simulē apstiprināšanu un apmaksātu
+  pirmo periodu. Tas nav PayPal galapunkts un nav iekļauts lietotnes API.
+- 2026-10-25: `interceptRequests: true` vajadzīgs parsētiem pieprasījumu datiem
+  un apstrādātāja kļūdu izolēšanai. Nezināmi maršruti atgriež 501.
 
-## Observations
+## Novērojumi
 
 <!-- begin:observations -->
 
-2026-10-25: the paypal member served OAuth, repeated creation, pending and paid
-lookups, signature success/failure, cancellation and an unknown subscription.
-The client also rejected an unreachable local address. No member stayed silent.
-2026-10-25: a second run exercised SubscriptionsService with real PostgreSQL,
-including repeated checkout, ownership, signature rejection, webhook deduplication,
-activation and repeated cancellation. The paypal member served all provider calls.
+2026-10-25: PayPal simulācijas daļa apkalpoja OAuth, atkārtotu izveidi, gaidošu
+un apmaksātu abonementu nolasīšanu, derīgu un nederīgu parakstu, atcelšanu un
+nezināmu abonementu. Klients arī noraidīja nesasniedzamu lokālo adresi.
+Visi pieprasījumi saņēma atbildi.
+
+2026-10-25: otrajā palaišanas reizē SubscriptionsService tika pārbaudīts ar īstu
+PostgreSQL datubāzi, tostarp atkārtota noformēšana, īpašumtiesības, nederīga paraksta
+noraidīšana, atkārtotu tīmekļa aizķeru atpazīšana, aktivizācija un atkārtota atcelšana.
+PayPal simulācijas daļa apkalpoja visus pieprasījumus pakalpojuma sniedzējam.
+Šis ir vēsturiskais pārbaudes rezultāts; pašreizējā lietotne izmanto SQLite.
 <!-- end:observations -->

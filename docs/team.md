@@ -1,24 +1,25 @@
-# Команда
+# Komanda
 
-В текущей реконструкции истории — 26 коммитов: по 7 у Маириса и Глеба, по 6 у Максима и Кирилла.
+Pašreizējā rekonstruētajā vēsturē ir 29 komiti: Glebam 8, Mairim, Maksimam un Kirillam pa 7.
 
-| Участник | Git-автор                               | Зона ответственности                                           |
-| -------- | --------------------------------------- | -------------------------------------------------------------- |
-| Максим   | Maksims Mitrofanovs <A230458MM@rvt.lv>  | NestJS, авторизация, коты, публикации, доступ, тестовые данные |
-| Кирилл   | Kirills Breznevs <blame.le77@gmail.com> | Prisma, платежи, миграции, DevOps, CI                          |
-| Маирис   | Mairis Pelss <A231403MP@rvt.lv>         | Визуальный стиль, иллюстрации, каталог и профиль кота          |
-| Глеб     | Glebs Litvinenko <A230111GL@rvt.lv>     | API-клиент, вход, кабинет и результат оплаты                   |
+| Dalībnieks | Git autors                              | Atbildības joma                                                     |
+| ---------- | --------------------------------------- | ------------------------------------------------------------------- |
+| Maksims    | Maksims Mitrofanovs <A230458MM@rvt.lv>  | NestJS, autentifikācija, kaķi, publikācijas, piekļuve un testa dati |
+| Kirills    | Kirills Breznevs <blame.le77@gmail.com> | Prisma, maksājumi, migrācijas, DevOps un CI                         |
+| Mairis     | Mairis Pelss <A231403MP@rvt.lv>         | Vizuālais stils, ilustrācijas, katalogs un kaķa profils             |
+| Glebs      | Glebs Litvinenko <A230111GL@rvt.lv>     | API klients, pieteikšanās, konts un maksājuma rezultāts             |
 
-Данные авторов предоставлены командой. Привязка к GitHub зависит от наличия этих
-email в аккаунтах участников; подтверждённые подписи Git отсутствуют.
+Autoru datus sniegusi komanda. Sasaiste ar GitHub ir atkarīga no šo e-pastu
+esamības dalībnieku kontos; apstiprinātu Git parakstu nav.
 
-История — ретроспективное оформление текущей реализации, с датами этапов
-с 15 сентября по 25 октября 2026 года. Это не журнал фактической двухмесячной
-работы и не подтверждение независимого вклада каждого участника. Перед сдачей
-команда должна проверить код и принять соответствующие части.
+Vēsture ir pašreizējās realizācijas retrospektīvs noformējums ar posmu datumiem
+no 2026. gada 15. septembra līdz 25. oktobrim. Tā nav faktiskā divu mēnešu darba
+uzskaite un neapliecina katra dalībnieka neatkarīgu ieguldījumu. Pirms nodošanas
+komandai jāpārbauda kods un jāapstiprina attiecīgās daļas.
 
-PR открывается текущим авторизованным GitHub-аккаунтом. Ревью каждый участник
-оставляет сам. В истории нет искусственных ревью, созданных от имени других людей.
+Izmaiņu pieprasījumu atver pašlaik autorizētais GitHub konts. Katrs dalībnieks
+koda pārskatīšanu veic pats. Vēsturē nav mākslīgu pārskatījumu citu cilvēku vārdā.
 
-Для продолжения: отдельная ветка на задачу, небольшие изменения, PR с описанием
-и фактическими проверками, merge без squash для сохранения авторов коммитов.
+Turpmākam darbam: atsevišķs zars katram uzdevumam, nelielas izmaiņas un izmaiņu
+pieprasījums ar aprakstu un faktiski veiktajām pārbaudēm. Apvienojiet bez squash,
+lai saglabātu komitu autorus.

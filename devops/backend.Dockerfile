@@ -9,7 +9,7 @@ COPY backend backend
 COPY frontend/public frontend/public
 RUN npm run db:generate && npm run build -w backend
 WORKDIR /app/backend
-RUN mkdir -p uploads && chown -R node:node uploads
+RUN mkdir -p uploads data && chown -R node:node uploads data
 USER node
 EXPOSE 3000
 CMD ["sh", "-c", "npm run db:migrate && npm start"]

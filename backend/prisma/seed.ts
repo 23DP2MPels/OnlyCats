@@ -1,14 +1,14 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import bcrypt from 'bcryptjs';
 import sharp from 'sharp';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { databaseUrl } from '../src/database';
 const prisma = new PrismaClient({
-  adapter: new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
-    connectionTimeoutMillis: 5000,
+  adapter: new PrismaBetterSqlite3({
+    url: databaseUrl,
   }),
 });
 async function main() {

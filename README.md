@@ -1,126 +1,185 @@
 # OnlyCats
 
-Учебный проект для техникума: подписки на котов и приватные фотографии.
-Монорепозиторий: **NestJS + Vue 3 + Prisma ORM + PostgreSQL**.
-Оплата — исключительно **PayPal Sandbox**; настоящие деньги не используются.
+Mācību projekts tehnikumam: kaķu abonementi un privātas fotogrāfijas.
+Monorepozitorijs: **NestJS + Vue 3 + Prisma ORM + SQLite**.
+Maksājumi notiek tikai **PayPal Sandbox** vidē; īsta nauda netiek izmantota.
 
-## Возможности
+## Iespējas
 
-- Регистрация, вход, сессия в HttpOnly cookie, выход.
-- Каталог с поиском и фильтрами, страницы котов и открытые публикации.
-- Создание и редактирование котов в кабинете владельца.
-- Создание, редактирование и удаление публикаций, загрузка фотографий до 8 МБ.
-- Приватные тексты и файлы доступны владельцу, администратору или действующему подписчику.
-- Подписка на одного кота: **5 USD / месяц**, PayPal Sandbox.
-- Серверная проверка оплаты, синхронизация статуса, отмена, проверка подписи webhook.
-- API просмотра пользователей для администратора, Swagger, Docker Compose и GitHub Actions.
-- Латышский, русский и английский интерфейс, светлая и тёмная темы, шрифты Nunito Sans/Bitter.
-- Главная лента соцсети с вкладками «Для вас» и «Мои подписки», лайки и комментарии.
+- Reģistrācija, pieteikšanās, sesija HttpOnly sīkdatnē un izrakstīšanās.
+- Katalogs ar meklēšanu un filtriem, kaķu profili un publiskas publikācijas.
+- Kaķu un publikāciju izveide un rediģēšana īpašnieka kontā.
+- Publikāciju dzēšana un fotoattēlu augšupielāde līdz 8 MB.
+- Privāti teksti un faili īpašniekam, administratoram un aktīviem abonentiem.
+- Viena kaķa abonements: **5 USD mēnesī**, izmantojot PayPal Sandbox.
+- Maksājuma pārbaude serverī, statusa sinhronizācija, atcelšana un tīmekļa aizķeres paraksta pārbaude.
+- Administratora API lietotāju apskatei, Swagger un GitHub Actions.
+- Saskarne latviešu, krievu un angļu valodā, gaišā un tumšā tēma.
+- Sociālā plūsma, atzīmes “Patīk” un komentāri.
 
-## Структура
+## Struktūra
 
 ```text
-backend/   NestJS API, Prisma, миграции, тесты
-frontend/  Vue, TypeScript, Vite, оригинальные SVG-иллюстрации
-devops/    Dockerfile, Nginx и генератор иллюстраций
-docs/      API, архитектура, демонстрация, распределение работы
-postman/   Локальная HTTP-симуляция PayPal
+backend/   NestJS API, Prisma, migrācijas un testi
+frontend/  Vue, TypeScript, Vite un oriģinālas SVG ilustrācijas
+devops/    Atsevišķo pakalpojumu Dockerfile, Nginx un ilustrāciju ģenerators
+docs/      API, arhitektūra, demonstrācija un darbu sadalījums
+postman/   Lokāla PayPal HTTP simulācija
+Dockerfile Abu lietotnes daļu būvēšana un palaišana vienā konteinerā
 ```
 
-## Быстрый запуск через Docker
+## Palaišana vienā Docker konteinerā
 
-Нужны Docker Desktop с Compose и Git.
+Nepieciešams Docker Desktop ar Compose un Git.
 
 ```powershell
 Copy-Item .env.example .env
-# В .env замените JWT_SECRET случайной строкой минимум 32 символа.
+# Failā .env aizstājiet JWT_SECRET ar nejaušu virkni, kurā ir vismaz 32 rakstzīmes.
 docker compose up --build -d
-docker compose exec backend npm run db:seed
+docker compose exec app npm run db:seed
 ```
 
-Сайт: http://localhost:8080 · API: http://localhost:8080/api/docs
+Vietne: http://localhost:8080 · API: http://localhost:8080/api/docs
 
-Для остановки: `docker compose down`. Данные сохраняются в named volumes.
-Никогда не используйте `down -v`, если нужно сохранить фотографии и базу.
-Seed предназначен только для учебного окружения, он создаёт известные демонстрационные пароли.
+Viens NestJS process izsniedz API un Vue būvējuma failus, ieskaitot Vue Router
+maršrutus. Migrācijas tiek izpildītas pirms API palaišanas. SQLite darbojas tajā
+pašā procesā; atsevišķs datubāzes serveris nav vajadzīgs.
 
-## Запуск без Docker
+Apturēšana: `docker compose down`. Dati saglabājas nosauktajos sējumos
+`sqlite_data` un `uploads`. Nelietojiet `down -v`, ja jāsaglabā datubāze un fotoattēli.
+Sākotnējo datu skripts paredzēts mācību videi un izveido zināmas demonstrācijas paroles.
 
-Нужны Node.js 22.12+ (рекомендуется Node 22 LTS), npm и PostgreSQL 17+.
-Создайте БД `onlycats` и пользователя согласно `backend/.env`.
+Bez Compose var izmantot to pašu Dockerfile:
+
+```powershell
+docker build -t onlycats .
+docker run -d --name onlycats --env-file .env -p 8080:3000 -v onlycats_data:/app/backend/data -v onlycats_uploads:/app/backend/uploads onlycats
+docker exec onlycats npm run db:seed
+```
+
+## Vides mainīgie, API adrese un CORS
+
+Docker palaišanai izmantojiet saknes `.env`, lokālajam backend — `backend/.env`.
+
+| Mainīgais          | Piemērs                                | Pielietojums                                                            |
+| ------------------ | -------------------------------------- | ----------------------------------------------------------------------- |
+| `JWT_SECRET`       | Nejauša virkne ar vismaz 32 rakstzīmēm | Sesiju parakstīšana                                                     |
+| `FRONTEND_URL`     | `http://localhost:8080`                | Publiskā vietnes adrese un PayPal atgriešanās saites                    |
+| `API_URL`          | `/api`                                 | API bāzes adrese Vue klientam; var norādīt `https://api.example.lv/api` |
+| `CORS_ORIGIN`      | `http://localhost:8080`                | Atļautā pārlūka izcelsme; vairākas adreses atdala ar komatu             |
+| `DATABASE_URL`     | `file:./data/onlycats.db`              | SQLite fails; konteinerā izmanto absolūtu ceļu                          |
+| `COOKIE_SAME_SITE` | `lax`                                  | Sesijas sīkdatnes politika: `lax`, `strict` vai `none`                  |
+| `COOKIE_SECURE`    | `false`                                | `true` ļauj sīkdatni pārsūtīt tikai ar HTTPS                            |
+| `PORT`             | `3000`                                 | Porta numurs konteinera iekšienē                                        |
+| `FRONTEND_DIST`    | `/app/frontend/dist`                   | Vue būvējuma mape; Dockerfile to iestata automātiski                    |
+
+Vienā konteinerā atstājiet `API_URL=/api`: pārlūks izmanto to pašu domēnu un
+portu. Ārējai API adresei jābūt sasniedzamai no lietotāja pārlūka; Docker servisa
+nosaukums pārlūkā nav publiska adrese. `API_URL` jāiekļauj API prefikss `/api`.
+
+`CORS_ORIGIN` satur precīzas izcelsmes ar protokolu un portu, bez ceļa un beigu
+slīpsvītras. Piemērs: `https://cats.example.lv,http://localhost:5173`.
+Aizstājējzīme `*` netiek atbalstīta, jo autentifikācija izmanto sīkdatnes.
+Šis pats saraksts pārbauda arī datus mainošo pārlūka pieprasījumu Origin.
+
+API konfigurācija tiek izsniegta ar `/runtime-config.js`, tāpēc pēc `API_URL`
+maiņas Vue nav jāpārbūvē. Pēc `.env` maiņas atjaunojiet konteineru:
+
+```powershell
+docker compose up -d --force-recreate app
+```
+
+Ja frontend un API atrodas dažādās vietnēs, izmantojiet HTTPS,
+`COOKIE_SAME_SITE=none` un `COOKIE_SECURE=true`. Pārlūka trešo pušu sīkdatņu
+ierobežojumi joprojām var ietekmēt pieteikšanos. Vienas izcelsmes izvietojums
+ar `API_URL=/api` ļauj izmantot noklusējuma `lax` politiku.
+
+## Palaišana bez Docker
+
+Nepieciešams Node.js 22.12+ (ieteicams Node 22 LTS) un npm.
+SQLite glabā datus failā `backend/data/onlycats.db`.
 
 ```powershell
 npm ci
 Copy-Item backend/.env.example backend/.env
-# Укажите DATABASE_URL и случайный JWT_SECRET в backend/.env.
+# Failā backend/.env norādiet nejaušu JWT_SECRET vērtību.
 npm run db:generate
 npm run db:migrate
 npm run db:seed
 npm run dev:backend
 ```
 
-В другом терминале из корня:
+Citā terminālī no repozitorija saknes:
 
 ```powershell
 npm run dev:frontend
 ```
 
-Сайт: http://localhost:5173 · API: http://localhost:3000/api/docs
-Vite проксирует `/api` на NestJS. После правок backend перезапустите его;
-frontend обновляется автоматически.
+Vietne: http://localhost:5173 · API: http://localhost:3000/api/docs
+Vite pārsūta `/api` pieprasījumus uz NestJS. Pēc backend izmaiņām tas jāpārstartē;
+frontend atjaunojas automātiski. Ja Vite klientam vajadzīga ārēja API adrese,
+izveidojiet `frontend/.env` pēc `frontend/.env.example` un iestatiet `VITE_API_URL`.
+Šo Vite mainīgo nolasa izstrādes servera palaišanas vai būvēšanas laikā;
+Docker vidē lietojiet izpildlaika `API_URL`.
 
-## Демонстрационные аккаунты
+SQLite fails tiek izveidots ar `npm run db:migrate`. Komandas palaidiet no
+projekta saknes, izmantojot npm skriptus. Lai izveidotu rezerves kopiju,
+apturiet backend un nokopējiet datubāzes failu un augšupielādētos fotoattēlus.
 
-После seed у всех пароль `OnlyCatsDemo2026!`:
+## Demonstrācijas konti
 
-| Email                 | Назначение              |
-| --------------------- | ----------------------- |
-| creator@onlycats.test | Владелец четырёх котов  |
-| viewer@onlycats.test  | Посетитель без подписки |
-| admin@onlycats.test   | Администратор           |
+Pēc sākotnējo datu ievietošanas visiem ir parole `OnlyCatsDemo2026!`:
 
-Seed повторно не перезаписывает существующих пользователей, котов и публикации.
-В seed сочетаются собственные иллюстрации и общедоступные фотографии Unsplash;
-авторы и лицензия перечислены в [docs/assets.md](docs/assets.md).
-Новые настоящие фотографии можно загрузить из кабинета.
+| E-pasts               | Pielietojums                 |
+| --------------------- | ---------------------------- |
+| creator@onlycats.test | Četru kaķu īpašnieks         |
+| viewer@onlycats.test  | Apmeklētājs bez abonementiem |
+| admin@onlycats.test   | Administrators               |
+
+Sākotnējo datu skripts atkārtoti nepārraksta esošos lietotājus, kaķus un publikācijas.
+Izmantotas pašu ilustrācijas un publiski pieejami Unsplash fotoattēli;
+autori un licence norādīti [attēlu aprakstā](docs/assets.md).
+Īpašnieks var augšupielādēt jaunus fotoattēlus savā kontā.
 
 ## PayPal Sandbox
 
-Настройка описана в [docs/paypal.md](docs/paypal.md).
-Без ключей работают каталог, авторизация, кабинет и публикации; оформление оплаты
-показывает сообщение о необходимости настроить Sandbox. Фиктивной активации подписки нет.
+Iestatīšana aprakstīta [PayPal instrukcijā](docs/paypal.md).
+Bez piekļuves atslēgām darbojas katalogs, autentifikācija, lietotāja konts un publikācijas;
+maksājuma noformēšana parāda norādi iestatīt Sandbox. Fiktīva abonementa aktivizācija netiek veikta.
 
-## Проверки
+## Pārbaudes
 
 ```powershell
 npm run db:generate
 npm run build
 npm test
-npm run test:http -w backend  # Нужны запущенный API и отдельная seeded БД
-npm run test:social -w backend # Лайки, комментарии, приватность и пагинация ленты
+npm run test:http -w backend  # Vajadzīgs palaists API un atsevišķa datubāze ar testa datiem.
+npm run test:social -w backend # Atzīmes, komentāri, privātums un plūsmas lapošana.
+npm run test:deployment -w backend # Vajadzīgs API ar iestatītu FRONTEND_DIST un Vue būvējumu.
 npm audit
 ```
 
-HTTP smoke создаёт нового тестового пользователя и временную публикацию;
-публикацию удаляет после проверки. Не запускайте его против ценной базы.
-Проверка PayPal без ключей: [postman/simulations/paypal.context.md](postman/simulations/paypal.context.md).
+HTTP pamatdarbības tests izveido jaunu testa lietotāju un pagaidu publikāciju;
+publikācija pēc pārbaudes tiek izdzēsta. Nelietojiet testu ar vērtīgiem datiem.
+PayPal pārbaude bez piekļuves atslēgām aprakstīta [simulācijas instrukcijā](postman/simulations/paypal.context.md).
 
-## Команда и история
+## Komanda un vēsture
 
-Максим — backend; Кирилл — backend и DevOps; Маирис и Глеб — frontend.
-Подробности: [docs/team.md](docs/team.md).
+Maksims — backend; Kirills — backend un DevOps; Mairis un Glebs — frontend.
+Papildinformācija: [komandas apraksts](docs/team.md).
 
-История коммитов оформляется ретроспективно по этапам 15 сентября — 25 октября 2026 года.
-Указанные даты и авторы отражают согласованное распределение, а не доказательство
-фактической разработки в эти дни. Участникам нужно проверить свою часть перед сдачей.
-Даты GitHub PR и ревью остаются фактическими.
+Komitu vēsture noformēta retrospektīvi pa posmiem no 2026. gada 15. septembra
+līdz 25. oktobrim. Datumi un autori atspoguļo saskaņoto darbu sadalījumu,
+nevis apliecina faktisko izstrādi šajās dienās. Pirms nodošanas dalībniekiem
+jāpārbauda sava daļa. GitHub izmaiņu pieprasījumu un koda pārskatīšanas datumi ir faktiskie.
 
-## Границы учебного MVP
+## Mācību MVP ierobežojumi
 
-Единый аккаунт продавца и общий месячный тариф. Нет выплат владельцам, возвратов,
-смены тарифов, восстановления пароля, подтверждения email и отдельного интерфейса
-модератора. Отмена закрывает доступ сразу. Без webhook продление требует кнопки
-«Обновить статус» в кабинете. Каталог и лента ограничены 100 записями.
+Tiek izmantots viens pārdevēja konts un kopīgs mēneša tarifs. Nav izmaksu
+īpašniekiem, atmaksu, tarifu maiņas, paroles atjaunošanas, e-pasta apstiprināšanas
+un atsevišķas moderatora saskarnes. Atcelšana uzreiz pārtrauc piekļuvi.
+Bez tīmekļa aizķeres pagarinājums jāpārbauda ar statusa atjaunošanas pogu kontā.
+Katalogā un plūsmā ir ne vairāk kā 100 ierakstu.
 
-Docker-конфигурация предназначена для локальной демонстрации. Для публичного размещения
-понадобятся HTTPS, резервное копирование, отдельные секреты и обслуживание хранилища.
+Docker konfigurācija paredzēta lokālai demonstrācijai. Publiskai izvietošanai
+vajadzīgs HTTPS, rezerves kopijas, atsevišķi noslēpumi un datu glabātuves uzturēšana.

@@ -1,36 +1,47 @@
-# Архитектура
+# Arhitektūra
 
 ```mermaid
 flowchart LR
-  Browser[Vue 3] --> Proxy[Vite или Nginx /api]
-  Proxy --> API[NestJS]
-  API --> ORM[Prisma + pg adapter]
-  ORM --> DB[(PostgreSQL)]
-  API --> Files[Закрытая папка uploads]
+  Browser[Vue 3 pārlūkā] --> API[NestJS: Vue faili un API]
+  API --> ORM[Prisma + better-sqlite3 adapteris]
+  ORM --> DB[(SQLite: data/onlycats.db)]
+  API --> Files[Slēgta uploads mape]
   API --> PayPal[PayPal Sandbox]
-  PayPal --> Webhook[Webhook: проверка подписи]
+  PayPal --> Webhook[Tīmekļa aizķere: paraksta pārbaude]
   Webhook --> API
 ```
 
-Backend — небольшой монолит. Контроллер связывает HTTP-запросы с Prisma и
-сервисами оплаты; правила доступа и преобразование состояния PayPal выделены
-в чистые функции для независимой проверки. При расширении контроллер можно
-разделить на модули auth, cats, posts и subscriptions.
+Saknes Dockerfile būvē frontend un backend un palaiž vienu NestJS procesu.
+Tas izsniedz Vue statiskos failus, klienta maršrutu sākumlapu un API ar `/api`
+prefiksu. Izstrādē Vite darbojas atsevišķi un pārsūta `/api` uz NestJS.
 
-Пользователь может одновременно владеть котами и подписываться на чужих.
-Отдельной роли CREATOR нет: владение определяется `Cat.ownerId`. ADMIN может
-модерировать публикации через API. Администратор создаётся seed, публичная
-регистрация всегда назначает USER.
+Backend ir neliels monolīts. Kontrolieris savieno HTTP pieprasījumus ar Prisma
+un maksājumu servisiem. Piekļuves noteikumi un PayPal stāvokļa pārveidošana
+izdalīti tīrās funkcijās neatkarīgai testēšanai. Paplašinot sistēmu, kontrolieri
+var sadalīt moduļos auth, cats, posts un subscriptions.
 
-Приватная публикация возвращает только заголовок, дату и признак блокировки.
-Текст, ключ файла и URL картинки не выдаются. Файлы не раздаются статически:
-каждый GET картинки повторно проверяет права и отправляет `private, no-store`.
-Загруженное изображение декодируется и перекодируется в JPEG без исходных метаданных.
+Lietotājs var būt savu kaķu īpašnieks un abonēt citu kaķu saturu.
+Atsevišķas CREATOR lomas nav: īpašumtiesības nosaka `Cat.ownerId`. ADMIN var
+moderēt publikācijas ar API. Administratoru izveido sākotnējo datu skripts,
+bet publiskā reģistrācija vienmēr piešķir lomu USER.
 
-JWT хранится в HttpOnly cookie, SameSite=Lax. Для HTTPS используется Secure.
-Проверяются Origin у изменяющих запросов, типы DTO и владение объектами.
-Пароли хешируются bcrypt. JWT, PayPal secret и локальные .env исключены из Git.
+Privātai publikācijai bez piekļuves atgriež tikai virsrakstu, datumu un bloķēšanas
+pazīmi. Tekstu, faila atslēgu un attēla URL neatklāj. Failus neizsniedz statiski:
+katrs attēla GET atkārtoti pārbauda tiesības un nosūta `private, no-store`.
+Augšupielādēto attēlu dekodē un pārkodē JPEG formātā bez sākotnējiem metadatiem.
 
-Основные таблицы: User → Cat → Post; User → Subscription ← Cat; WebhookEvent.
-Пара userId/catId и paypalId уникальны. paidUntil ограничивает доступ даже при
-потерянном уведомлении об истечении подписки. При отмене доступ прекращается сразу.
+JWT glabājas HttpOnly sīkdatnē; noklusējuma politika ir SameSite=Lax.
+HTTPS gadījumā izmanto Secure. Dažādām vietnēm var iestatīt SameSite=None kopā
+ar Secure. CORS un datus mainošo pieprasījumu Origin pārbaude izmanto vienu
+atļauto izcelsmju sarakstu. Tiek pārbaudīti DTO tipi un objektu īpašumtiesības.
+Paroles jauc ar bcrypt. JWT, PayPal noslēpumi un lokālie .env faili nav iekļauti Git.
+
+Galvenās tabulas: User → Cat → Post; User → Subscription ← Cat; WebhookEvent.
+Pāris userId/catId un paypalId ir unikāli. paidUntil ierobežo piekļuvi arī tad,
+ja paziņojums par abonementa beigām nav saņemts. Atcelšana uzreiz pārtrauc piekļuvi.
+
+SQLite fails ir `backend/data/onlycats.db`. Prisma CLI, API un sākotnējo datu
+skripts izmanto vienu absolūto ceļu no `DATABASE_URL`. Konteinerā datubāzi
+saglabā sējumā `sqlite_data`, fotoattēlus — sējumā `uploads`.
+`API_URL` nonāk Vue klientā ar `/runtime-config.js`; publiskajā konfigurācijā
+netiek iekļauti servera noslēpumi.

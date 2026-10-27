@@ -1,15 +1,15 @@
-# Сценарий защиты
+# Projekta aizstāvēšanas scenārijs
 
-1. Покажите структуру монорепозитория, таблицы Prisma и локальную схему запуска.
-2. Откройте каталог: поиск по имени, фильтры, страница Мармелада.
-3. Без входа откройте приватную историю: её текст и фотография недоступны.
-4. Войдите как viewer@onlycats.test, покажите отсутствие доступа.
-5. После настройки ключей оформите подписку через Personal Sandbox аккаунт.
-   Покажите серверное подтверждение, доступ к приватной истории и запись в кабинете.
-6. Отмените подписку, убедитесь, что приватная фотография снова закрыта.
-7. Войдите как creator@onlycats.test. Создайте кота и публикацию, загрузите фото.
-8. Объясните, почему прямой URL картинки не обходит проверку подписки.
-9. Покажите `npm test`, результат сборки, HTTP smoke и CI.
+1. Parādiet monorepozitorija struktūru, Prisma tabulas un palaišanu vienā konteinerā.
+2. Atveriet katalogu: meklēšanu pēc vārda, filtrus un Marmelāda profilu.
+3. Bez pieteikšanās atveriet privātu stāstu: tā teksts un fotoattēls nav pieejami.
+4. Piesakieties kā viewer@onlycats.test un parādiet, ka piekļuves joprojām nav.
+5. Pēc piekļuves atslēgu iestatīšanas noformējiet abonementu ar Personal Sandbox kontu.
+   Parādiet apstiprinājumu serverī, piekļuvi privātajam stāstam un ierakstu lietotāja kontā.
+6. Atceliet abonementu un pārliecinieties, ka privātais fotoattēls atkal ir slēgts.
+7. Piesakieties kā creator@onlycats.test. Izveidojiet kaķi un publikāciju, augšupielādējiet fotoattēlu.
+8. Paskaidrojiet, kāpēc tiešs attēla URL neļauj apiet abonementa pārbaudi.
+9. Parādiet `npm test`, būvējuma rezultātu, HTTP pamatdarbības testu un CI.
 
-Если ключи ещё не настроены, явно обозначьте, что оплата проверена только на
-локальной симуляции. Не демонстрируйте её как реальный Sandbox-платёж.
+Ja piekļuves atslēgas vēl nav iestatītas, skaidri norādiet, ka maksājumi
+pārbaudīti tikai lokālā simulācijā. Neuzrādiet to kā īstu Sandbox maksājumu.

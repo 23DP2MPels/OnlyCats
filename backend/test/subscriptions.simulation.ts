@@ -69,7 +69,7 @@ async function main() {
     assert.equal(hasPaidAccess(await service.cancel(user.id, sub.id)), false);
     assert.equal((await service.cancel(user.id, sub.id)).status, 'CANCELLED');
     console.log(
-      'Subscription integration passed: real PostgreSQL + PayPal HTTP simulation, repeated checkout, ownership, invalid signature, duplicate webhook, paid access and idempotent cancellation.',
+      'Subscription integration passed: real SQLite + PayPal HTTP simulation, repeated checkout, ownership, invalid signature, duplicate webhook, paid access and idempotent cancellation.',
     );
   } finally {
     await prisma.webhookEvent.deleteMany({ where: { id: eventId } });

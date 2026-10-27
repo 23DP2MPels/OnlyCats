@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { databaseUrl } from './database';
 
 @Injectable()
 export class PrismaService
@@ -9,14 +10,14 @@ export class PrismaService
 {
   constructor() {
     super({
-      adapter: new PrismaPg({
-        connectionString: process.env.DATABASE_URL,
-        connectionTimeoutMillis: 5000,
+      adapter: new PrismaBetterSqlite3({
+        url: databaseUrl,
       }),
     });
   }
   async onModuleInit() {
     await this.$connect();
+    await this.$queryRaw`SELECT 1`;
   }
   async onModuleDestroy() {
     await this.$disconnect();

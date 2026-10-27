@@ -6,3 +6,6 @@ node_modules
 .git
 .local
 backend/uploads
+backend/data
+**/*.db
+**/*.db-*

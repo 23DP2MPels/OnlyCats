@@ -25,5 +25,8 @@
   },
   "devDependencies": {
     "prettier": "^3.9.10"
+  },
+  "allowScripts": {
+    "better-sqlite3": true
   }
 }
