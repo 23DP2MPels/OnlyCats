@@ -23,9 +23,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { mkdir, writeFile, unlink } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
-import { join } from 'node:path';
 import sharp from 'sharp';
 import {
   AuthGuard,
@@ -179,6 +176,8 @@ export class ApiController {
     @CurrentUser() user: SessionUser,
     @Body() dto: CatDto,
   ) {
+    if (dto.avatar?.startsWith('/api/'))
+      throw new BadRequestException('Выберите изображение');
     return this.prisma.cat.create({ data: { ...dto, ownerId: user.id } });
   }
   private async ownCat(id: string, user: SessionUser) {
@@ -193,7 +192,9 @@ export class ApiController {
     @CurrentUser() user: SessionUser,
     @Body() dto: CatDto,
   ) {
-    await this.ownCat(id, user);
+    const current = await this.ownCat(id, user);
+    if (dto.avatar?.startsWith('/api/') && dto.avatar !== current.avatar)
+      throw new BadRequestException('Выберите изображение');
     return this.prisma.cat.update({ where: { id }, data: dto });
   }
 
@@ -265,7 +266,9 @@ export class ApiController {
     await this.ownCat(post.catId, user);
     await this.prisma.post.delete({ where: { id } });
     if (post.imageKey)
-      await unlink(join(config.uploadDir, post.imageKey)).catch(() => {});
+      await this.prisma.storedImage.deleteMany({
+        where: { id: post.imageKey },
+      });
     return { ok: true };
   }
   @Post('posts/:id/image')
@@ -283,34 +286,16 @@ export class ApiController {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post) throw new NotFoundException();
     await this.ownCat(post.catId, user);
-    if (!file) throw new BadRequestException('Выберите изображение');
-    let image: Buffer;
-    try {
-      const decoded = sharp(file.buffer, { limitInputPixels: 25000000 });
-      const metadata = await decoded.metadata();
-      if (!['jpeg', 'png', 'webp'].includes(metadata.format || ''))
-        throw new Error('Unsupported image format');
-      image = await decoded
-        .rotate()
-        .resize({ width: 1600, withoutEnlargement: true })
-        .jpeg({ quality: 85 })
-        .toBuffer();
-    } catch {
-      throw new BadRequestException(
-        'Нужна фотография JPEG, PNG или WebP до 8 МБ',
-      );
-    }
-    const key = `${randomUUID()}.jpg`;
-    await mkdir(config.uploadDir, { recursive: true });
-    await writeFile(join(config.uploadDir, key), image);
-    try {
-      await this.prisma.post.update({ where: { id }, data: { imageKey: key } });
-    } catch (error) {
-      await unlink(join(config.uploadDir, key)).catch(() => {});
-      throw error;
-    }
-    if (post.imageKey)
-      await unlink(join(config.uploadDir, post.imageKey)).catch(() => {});
+    const image = await this.decodeImage(file);
+    await this.prisma.$transaction(async (tx) => {
+      const stored = await tx.storedImage.create({
+        data: { data: new Uint8Array(image) },
+      });
+      const current = await tx.post.findUniqueOrThrow({ where: { id } });
+      await tx.post.update({ where: { id }, data: { imageKey: stored.id } });
+      if (current.imageKey)
+        await tx.storedImage.deleteMany({ where: { id: current.imageKey } });
+    });
     return { imageUrl: `/api/posts/${id}/image` };
   }
   @Get('posts/:id/image') @UseGuards(OptionalAuthGuard) async image(
@@ -337,10 +322,72 @@ export class ApiController {
         throw new ForbiddenException('Нужна активная подписка');
     }
     res.setHeader('Cache-Control', 'private, no-store');
-    res.sendFile(join(config.uploadDir, post.imageKey), (error) => {
-      if (error && !res.headersSent)
-        res.status(404).json({ message: 'Фотография не найдена' });
+    const stored = await this.prisma.storedImage.findUnique({
+      where: { id: post.imageKey },
     });
+    if (!stored) throw new NotFoundException();
+    res.type('image/jpeg').send(Buffer.from(stored.data));
+  }
+
+  private async decodeImage(file?: Express.Multer.File): Promise<Buffer> {
+    if (!file) throw new BadRequestException('Выберите изображение');
+    let image: Buffer;
+    try {
+      const decoded = sharp(file.buffer, { limitInputPixels: 25000000 });
+      const metadata = await decoded.metadata();
+      if (!['jpeg', 'png', 'webp'].includes(metadata.format || ''))
+        throw new Error('Unsupported image format');
+      image = await decoded
+        .rotate()
+        .resize({ width: 1600, withoutEnlargement: true })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+    } catch {
+      throw new BadRequestException(
+        'Нужна фотография JPEG, PNG или WebP до 8 МБ',
+      );
+    }
+    return image;
+  }
+  @Post('cats/:id/avatar')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 8 * 1024 * 1024, files: 1 },
+    }),
+  )
+  async uploadAvatar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: SessionUser,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    await this.ownCat(id, user);
+    const image = await this.decodeImage(file);
+    const stored = await this.prisma.$transaction(async (tx) => {
+      const stored = await tx.storedImage.create({
+        data: { data: new Uint8Array(image) },
+      });
+      const cat = await tx.cat.findUniqueOrThrow({ where: { id } });
+      await tx.cat.update({
+        where: { id },
+        data: { avatar: '/api/cats/' + id + '/avatar?v=' + stored.id },
+      });
+      const old = cat.avatar.match(/\?v=([a-f0-9-]+)$/)?.[1];
+      if (old) await tx.storedImage.deleteMany({ where: { id: old } });
+      return stored;
+    });
+    return { avatar: '/api/cats/' + id + '/avatar?v=' + stored.id };
+  }
+  @Get('cats/:id/avatar')
+  async avatar(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    const cat = await this.prisma.cat.findUnique({ where: { id } });
+    const key = cat?.avatar.match(/\?v=([a-f0-9-]+)$/)?.[1];
+    const image = key
+      ? await this.prisma.storedImage.findUnique({ where: { id: key } })
+      : null;
+    if (!image) throw new NotFoundException();
+    res.setHeader('Cache-Control', 'no-store');
+    res.type('image/jpeg').send(Buffer.from(image.data));
   }
 
   @Get('account') @UseGuards(AuthGuard) async account(

@@ -51,3 +51,7 @@ CORS atļautās izcelsmes norāda `CORS_ORIGIN`; atbalstītas vairākas precīza
 adreses, atdalītas ar komatu. Tiek atļauti pieprasījumi ar sīkdatnēm.
 Datus mainošiem pārlūka pieprasījumiem Origin papildus pārbauda serverī.
 `/runtime-config.js` ir publiska klienta konfigurācija un nesatur noslēpumus.
+
+## Kaķa fotogrāfija
+
+POST `/api/cats/:id/avatar`: īpašnieka multipart `file`, JPEG/PNG/WebP līdz 8 MB. Atgriež `{avatar}`. GET `/api/cats/:id/avatar` publiski izsniedz JPEG. Augšupielādes tiek validētas un pārkodētas, glabātas PostgreSQL `StoredImage.data` (BYTEA). Privāto publikāciju attēlu GET joprojām pārbauda abonementu.

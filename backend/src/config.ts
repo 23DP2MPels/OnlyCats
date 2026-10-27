@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { resolve } from 'node:path';
 
 export const config = {
   port: Number(process.env.PORT || 3000),
@@ -20,7 +19,6 @@ export const config = {
     process.env.COOKIE_SECURE === 'true' ||
     (process.env.FRONTEND_URL || '').startsWith('https://'),
   jwtSecret: process.env.JWT_SECRET || '',
-  uploadDir: resolve(process.env.UPLOAD_DIR || './uploads'),
   paypal: {
     baseUrl: 'https://api-m.sandbox.paypal.com',
     clientId: process.env.PAYPAL_CLIENT_ID || '',
@@ -33,10 +31,11 @@ export const config = {
 export function validateConfig() {
   if (config.jwtSecret.length < 32)
     throw new Error('JWT_SECRET must contain at least 32 characters');
-  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('file:'))
-    throw new Error(
-      'DATABASE_URL must be a SQLite file URL (file:./data/onlycats.db)',
-    );
+  if (
+    process.env.DATABASE_URL &&
+    !/^postgres(ql)?:\/\//.test(process.env.DATABASE_URL)
+  )
+    throw new Error('DATABASE_URL must be a PostgreSQL URL');
   new URL(config.frontendUrl);
   for (const origin of config.corsOrigins) {
     const parsed = new URL(origin);

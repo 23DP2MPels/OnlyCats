@@ -1,7 +1,6 @@
 import {
   IsBoolean,
   IsEmail,
-  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -26,14 +25,9 @@ export class CatDto {
   @IsString() @Length(2, 80) breed!: string;
   @IsString() @Length(10, 1000) bio!: string;
   @IsOptional()
-  @IsIn([
-    '/cats/marmalade.svg',
-    '/cats/luna.svg',
-    '/cats/oliver.svg',
-    '/cats/mochi.svg',
-    '/cats/marmalade.jpg',
-    '/cats/luna.jpg',
-  ])
+  @Matches(
+    /^(?:\/cats\/(?:marmalade|luna|oliver|mochi)\.(?:svg|jpg)|\/api\/cats\/[0-9a-f-]{36}\/avatar\?v=[0-9a-f-]{36})$/,
+  )
   avatar?: string;
 }
 export class PostDto {
