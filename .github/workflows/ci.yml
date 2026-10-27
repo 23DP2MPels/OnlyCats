@@ -48,3 +48,4 @@ jobs:
           npm run test:deployment -w backend || { cat /tmp/onlycats-api.log; exit 1; }
           npm run test:photos -w backend || { cat /tmp/onlycats-api.log; exit 1; }
           npm run test:account -w backend || { cat /tmp/onlycats-api.log; exit 1; }
+          npm run test:lifecycle -w backend || { cat /tmp/onlycats-api.log; exit 1; }

@@ -120,6 +120,7 @@ onMounted(load);
       </div>
       <div class="mx-auto max-w-[760px]">
         <SocialPost
+          @deleted="posts = posts.filter((item) => item.id !== post.id)"
           v-for="post in posts"
           :key="post.id"
           :post="post"

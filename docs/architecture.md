@@ -41,7 +41,7 @@ OwnerPayment saglabā unikālus PayPal maksājumus, WithdrawalRequest — rezerv
 izmaksu pieprasījumus bez īstas naudas pārskaitīšanas, LoginEvent — veiksmīgo
 pieteikšanos metadatus. Vēstures maršruti atlasa tikai pašreizējā lietotāja datus.
 Pāris userId/catId un paypalId ir unikāli. paidUntil ierobežo piekļuvi arī tad,
-ja paziņojums par abonementa beigām nav saņemts. Atcelšana uzreiz pārtrauc piekļuvi.
+ja paziņojums par abonementa beigām nav saņemts. Atcelšana pārtrauc pagarināšanu; piekļuve saglabājas līdz paidUntil.
 
 PostgreSQL glabā lietotāju datus un fotoattēlus tabulā `StoredImage` (BYTEA).
 Datubāzes savienojumu norāda `DATABASE_URL`; Compose saglabā to sējumā `postgres_data`.

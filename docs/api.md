@@ -84,3 +84,10 @@ vēstures ierobežojumi aprakstīti [ienākumu dokumentācijā](earnings.md).
 Lietotāja identifikatoru vienmēr iegūst no sesijas; klienta userId vai ownerId
 parametrs nemaina atlasi. Atbildes nesatur paroles, sesiju žetonus vai citu
 lietotāju maksājumu rekvizītus. [IP uzticamība un vēstures robežas](profile.md).
+
+## Search, gifts and deletion
+
+GET /api/search?q= searches public account names and cat names together (minimum 2 characters, maximum 20 results per type). GET /api/users/:id returns public profile and cats, without email or authentication fields.
+POST /api/cats/:id/gifts accepts {userId}; only the cat owner may grant 30 days of free access. giftUntil is independent of paidUntil; it creates no PayPal payment or earnings.
+DELETE /api/posts/:id is owner/admin-only and removes attached image and reactions. DELETE /api/account requires the current password, confirms provider cancellation for related PayPal subscriptions, removes owned data and invalidates the session. If provider cancellation fails, local account deletion does not proceed.
+Cancelling a subscription stops renewal and preserves access through the existing paidUntil/giftUntil boundary. Provider sync for CANCELLED subscriptions preserves the previously confirmed paidUntil.

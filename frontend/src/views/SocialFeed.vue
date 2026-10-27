@@ -68,7 +68,7 @@ function patch(id: string, changes: Partial<FeedPost>) {
           :class="{ selected: scope === 'subscriptions' }"
           ><UiIcon name="heart" />{{ t('Мои подписки') }}</RouterLink
         ><RouterLink to="/explore"
-          ><UiIcon name="search" />{{ t('Найти кота') }}</RouterLink
+          ><UiIcon name="search" />{{ t('Поиск') }}</RouterLink
         ><RouterLink to="/account"
           ><UiIcon name="user" />{{ t('Мой профиль') }}</RouterLink
         >
@@ -149,6 +149,7 @@ function patch(id: string, changes: Partial<FeedPost>) {
       </div>
       <template v-else
         ><SocialPost
+          @deleted="posts = posts.filter((item) => item.id !== post.id)"
           v-for="post in posts"
           :key="post.id"
           :post="post"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { validCardNumber } from '../card';
 import { api, formatDate } from '../api';
 import { locale, t } from '../i18n';
 
@@ -26,6 +27,7 @@ const error = ref('');
 const notice = ref('');
 const busy = ref(false);
 const amount = ref('');
+const cardNumber = ref('');
 const requestId = ref(crypto.randomUUID());
 function changeAmount() {
   requestId.value = crypto.randomUUID();
@@ -68,14 +70,17 @@ async function refresh() {
 }
 async function request() {
   await action(async () => {
+    if (!validCardNumber(cardNumber.value))
+      throw new Error('Проверьте номер карты: неверная контрольная сумма Луна');
     await api('/creator/withdrawals', {
       method: 'POST',
       body: JSON.stringify({
-        amount: amount.value,
+        amount: String(amount.value).trim().replace(',', '.'),
         requestId: requestId.value,
       }),
     });
     amount.value = '';
+    cardNumber.value = '';
     requestId.value = crypto.randomUUID();
     notice.value = 'Заявка сохранена. Перевод денег не выполняется.';
     await load();
@@ -142,15 +147,36 @@ onMounted(() => action(load));
           >{{ t('Сумма в USD') }}
           <input
             v-model="amount"
-            type="number"
-            min="0.01"
-            step="0.01"
-            :max="(earnings.availableCents / 100).toFixed(2)"
+            type="text"
+            inputmode="decimal"
+            pattern="[0-9]+([.,][0-9]{1,2})?"
             required
             :disabled="busy || !earnings.availableCents"
             @input="changeAmount"
           />
         </label>
+        <label
+          >{{ t('Номер тестовой карты') }}
+          <input
+            v-model="cardNumber"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            maxlength="26"
+            required
+            :disabled="busy || !earnings.availableCents"
+            :aria-invalid="
+              cardNumber.length > 0 && !validCardNumber(cardNumber)
+            "
+          />
+        </label>
+        <p class="muted">
+          {{
+            t(
+              'Только проверка Луна. Номер не сохраняется и не отправляется. Используйте тестовую карту.',
+            )
+          }}
+        </p>
         <button
           class="button primary"
           :disabled="busy || !earnings.availableCents"

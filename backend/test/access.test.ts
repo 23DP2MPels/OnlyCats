@@ -6,7 +6,7 @@ import {
   type PaypalDetails,
 } from '../src/access';
 const now = new Date('2026-10-25T12:00:00Z');
-test('access requires an active and unexpired paid subscription', () => {
+test('access lasts until its billing boundary even after cancellation', () => {
   assert.equal(hasPaidAccess(null, now), false);
   assert.equal(
     hasPaidAccess(
@@ -20,7 +20,7 @@ test('access requires an active and unexpired paid subscription', () => {
       { status: 'CANCELLED', paidUntil: new Date('2026-11-01') },
       now,
     ),
-    false,
+    true,
   );
   assert.equal(
     hasPaidAccess({ status: 'ACTIVE', paidUntil: null }, now),

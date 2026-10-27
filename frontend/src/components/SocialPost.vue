@@ -18,8 +18,24 @@ const props = defineProps<{
 const emit = defineEmits<{
   changed: [patch: Partial<FeedPost>];
   subscribe: [];
+  deleted: [];
 }>();
 const router = useRouter();
+const removed = ref(false);
+async function removePost() {
+  if (!window.confirm(t('Удалить эту историю?')) || busy.value) return;
+  busy.value = true;
+  error.value = '';
+  try {
+    await api('/posts/' + props.post.id, { method: 'DELETE' });
+    removed.value = true;
+    emit('deleted');
+  } catch (e) {
+    error.value = (e as Error).message;
+  } finally {
+    busy.value = false;
+  }
+}
 const busy = ref(false);
 const error = ref('');
 const expanded = ref(false);
@@ -93,7 +109,7 @@ async function send() {
 }
 </script>
 <template>
-  <article class="social-post">
+  <article v-if="!removed" class="social-post">
     <header class="social-post-header">
       <RouterLink :to="`/cats/${post.catId}`" class="post-author"
         ><img :src="post.cat.avatar" :alt="post.cat.name" />
@@ -137,6 +153,16 @@ async function send() {
       loading="lazy"
     />
     <div class="social-post-actions">
+      <button
+        v-if="
+          session.user?.id === post.cat.ownerId ||
+          session.user?.role === 'ADMIN'
+        "
+        :disabled="busy"
+        @click="removePost"
+      >
+        {{ t('Удалить пост') }}
+      </button>
       <button
         :class="{ liked: post.liked }"
         :disabled="busy || post.locked"

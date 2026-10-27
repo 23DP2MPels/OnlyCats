@@ -57,3 +57,7 @@ Tests izmanto īstu NestJS HTTP API un PostgreSQL kopā ar lokālu PayPal HTTP
 simulāciju. Tas pārbauda īpašumtiesības, summas, rezervācijas, paralēlus un
 atkārtotus pieprasījumus, atmaksas un pakalpojuma kļūmi. Tas neapliecina īstu
 Sandbox kontu vai publisko tīmekļa aizķeru pieejamību.
+
+## Test card and decimal input
+
+Withdrawal amount accepts a decimal string, comma decimal input or finite JSON number, normalizes it, then validates cent precision and records integer cents. The browser accepts a test card number and validates only its Luhn checksum (12–19 digits). Card numbers are never sent to the API, stored, or used for a payout. A valid checksum does not prove that a card exists or can receive money.

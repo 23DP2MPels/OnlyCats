@@ -71,8 +71,15 @@ async function main() {
       true,
     );
     await assert.rejects(() => service.checkout(user.id, catId), /активна/);
-    assert.equal(hasPaidAccess(await service.cancel(user.id, sub.id)), false);
+    assert.equal(hasPaidAccess(await service.cancel(user.id, sub.id)), true);
     assert.equal((await service.cancel(user.id, sub.id)).status, 'CANCELLED');
+    const cancelled = await prisma.subscription.findUniqueOrThrow({
+      where: { id: sub.id },
+    });
+    const synced = await service.sync(sub.id, user.id);
+    assert.equal(synced?.paidUntil?.getTime(), cancelled.paidUntil?.getTime());
+    assert.equal(hasPaidAccess(synced), true);
+    assert.equal(hasPaidAccess(synced, cancelled.paidUntil!), false);
     console.log(
       'Subscription integration passed: real PostgreSQL + PayPal HTTP simulation, repeated checkout, ownership, invalid signature, duplicate webhook, paid access and idempotent cancellation.',
     );

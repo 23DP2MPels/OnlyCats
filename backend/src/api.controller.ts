@@ -297,11 +297,11 @@ export class ApiController {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post) throw new NotFoundException();
     await this.ownCat(post.catId, user);
-    await this.prisma.post.delete({ where: { id } });
-    if (post.imageKey)
-      await this.prisma.storedImage.deleteMany({
-        where: { id: post.imageKey },
-      });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.post.delete({ where: { id } });
+      if (post.imageKey)
+        await tx.storedImage.deleteMany({ where: { id: post.imageKey } });
+    });
     return { ok: true };
   }
   @Post('posts/:id/image')

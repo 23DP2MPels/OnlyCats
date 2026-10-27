@@ -40,8 +40,13 @@ export class SocialController {
       throw new ForbiddenException('Войдите в аккаунт');
     const active = {
       userId: user?.id || '',
-      status: 'ACTIVE' as const,
-      paidUntil: { gt: new Date() },
+      OR: [
+        {
+          status: { in: ['ACTIVE', 'CANCELLED'] as ('ACTIVE' | 'CANCELLED')[] },
+          paidUntil: { gt: new Date() },
+        },
+        { giftUntil: { gt: new Date() } },
+      ],
     };
     const where: Prisma.PostWhereInput =
       scope === 'subscriptions'

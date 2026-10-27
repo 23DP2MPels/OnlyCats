@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
@@ -44,6 +45,13 @@ export class CommentDto {
 }
 
 export class WithdrawalDto {
+  @Transform(({ value }) =>
+    typeof value === 'number' && Number.isFinite(value)
+      ? String(value)
+      : typeof value === 'string'
+        ? value.trim().replace(',', '.')
+        : value,
+  )
   @IsString({
     message: 'Укажите положительную сумму в USD с точностью до цента',
   })
@@ -53,4 +61,11 @@ export class WithdrawalDto {
   amount!: string;
 
   @IsUUID() requestId!: string;
+}
+
+export class GiftDto {
+  @IsUUID() userId!: string;
+}
+export class DeleteAccountDto {
+  @IsString() @Length(1, 72) password!: string;
 }

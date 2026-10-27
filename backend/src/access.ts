@@ -2,14 +2,21 @@ import { SubscriptionStatus } from '@prisma/client';
 
 export function hasPaidAccess(
   subscription:
-    { status: SubscriptionStatus; paidUntil: Date | null } | null | undefined,
+    | {
+        status: SubscriptionStatus;
+        paidUntil: Date | null;
+        giftUntil?: Date | null;
+      }
+    | null
+    | undefined,
   now = new Date(),
 ) {
   return (
     !!subscription &&
-    subscription.status === 'ACTIVE' &&
-    !!subscription.paidUntil &&
-    subscription.paidUntil > now
+    ((!!subscription.giftUntil && subscription.giftUntil > now) ||
+      (['ACTIVE', 'CANCELLED'].includes(subscription.status) &&
+        !!subscription.paidUntil &&
+        subscription.paidUntil > now))
   );
 }
 

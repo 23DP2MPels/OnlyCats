@@ -1,3 +1,4 @@
+import { CommunityController } from './community.controller';
 import 'reflect-metadata';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -24,6 +25,7 @@ import { AccountController } from './account.controller';
     SocialController,
     CreatorController,
     AccountController,
+    CommunityController,
   ],
   providers: [
     PrismaService,

@@ -94,6 +94,7 @@ model Subscription {
   paypalId     String?            @unique
   checkoutKey  String             @default(uuid())
   status       SubscriptionStatus @default(PENDING)
+  giftUntil    DateTime?
   paidUntil    DateTime?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt

@@ -1570,3 +1570,12 @@
     }
   }
 }
+
+@layer components {
+  .page-section { padding-block: 2rem 3rem; }
+  .page-section > h1 { margin-bottom: 1.5rem; font-size: 2rem; font-weight: 650; }
+  .universal-search { width: 100%; margin-block: 1rem; }
+  .universal-search .search { display: flex; align-items: center; gap: .75rem; width: 100%; max-width: 42rem; min-height: 3rem; padding: .5rem 1rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--panel); }
+  .universal-search .search input { flex: 1; min-width: 0; width: 100%; margin: 0; padding: .4rem 0; border: 0; background: transparent; color: var(--ink); }
+  .universal-search h3 { margin-block: 1.5rem .75rem; font-weight: 650; }
+}

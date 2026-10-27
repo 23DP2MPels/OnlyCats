@@ -117,6 +117,8 @@ export class SubscriptionsService {
     } catch {
       throw new BadRequestException('Данные подписки PayPal не совпали');
     }
+    if (state.status === 'CANCELLED' && sub.paidUntil)
+      state.paidUntil = sub.paidUntil;
     // Optimistic concurrency prevents a delayed sync overwriting a concurrent cancellation.
     await this.prisma.subscription.updateMany({
       where: { id, updatedAt: sub.updatedAt },
@@ -150,7 +152,7 @@ export class SubscriptionsService {
     }
     return this.prisma.subscription.update({
       where: { id },
-      data: { status: 'CANCELLED', paidUntil: null },
+      data: { status: 'CANCELLED' },
     });
   }
 

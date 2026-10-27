@@ -1,3 +1,4 @@
+import UserProfile from './views/UserProfile.vue';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
@@ -15,6 +16,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: SocialFeed },
     { path: '/explore', component: Home },
+    { path: '/users/:id', component: UserProfile },
     { path: '/cats/:id', component: CatProfile },
     { path: '/login', component: Login },
     { path: '/account', component: Account },

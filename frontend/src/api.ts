@@ -30,6 +30,7 @@ export interface Post {
   createdAt: string;
 }
 export interface Subscription {
+  giftUntil?: string | null;
   id: string;
   cat: Cat;
   status: string;

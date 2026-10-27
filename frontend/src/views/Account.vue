@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GiftSubscription from '../components/GiftSubscription.vue';
 import { t } from '../i18n';
 import CreatorEarnings from '../components/CreatorEarnings.vue';
 import ProfileSettings from '../components/ProfileSettings.vue';
@@ -172,9 +173,7 @@ async function removePost(id: string) {
 }
 async function cancel(sub: Subscription) {
   if (
-    !window.confirm(
-      t('Отменить подписку? Доступ к приватным публикациям закроется сразу.'),
-    )
+    !window.confirm(t('Отключить продление? Доступ останется до конца срока.'))
   )
     return;
   await action(async () => {
@@ -237,6 +236,7 @@ onMounted(load);
             {{ t('+ Добавить кота') }}
           </button>
         </div>
+        <GiftSubscription :cats="data.cats" />
         <form v-if="catFormOpen" class="editor-card" @submit.prevent="saveCat">
           <h3>
             {{
@@ -455,8 +455,14 @@ onMounted(load);
               ><h3>{{ sub.cat.name }}</h3></RouterLink
             >
             <p>
-              {{ t(statusLabel[sub.status])
-              }}<span v-if="sub.paidUntil"
+              {{
+                sub.giftUntil && new Date(sub.giftUntil) > new Date()
+                  ? t('Подарочная подписка')
+                  : t(statusLabel[sub.status])
+              }}<span
+                v-if="sub.giftUntil && new Date(sub.giftUntil) > new Date()"
+                >{{ t('· до') }}{{ formatDate(sub.giftUntil) }}</span
+              ><span v-else-if="sub.paidUntil"
                 >{{ t('· до') }}{{ formatDate(sub.paidUntil) }}</span
               >
             </p>
@@ -470,7 +476,10 @@ onMounted(load);
             >
               {{ t('Обновить статус') }}</button
             ><button
-              v-if="!['CANCELLED', 'EXPIRED'].includes(sub.status)"
+              v-if="
+                !['CANCELLED', 'EXPIRED'].includes(sub.status) ||
+                (sub.giftUntil && new Date(sub.giftUntil) > new Date())
+              "
               class="text-button danger"
               :disabled="busy"
               @click="cancel(sub)"
@@ -480,7 +489,11 @@ onMounted(load);
           </div>
         </article>
         <p class="muted">
-          {{ t('Все платежи тестовые. При отмене доступ закрывается сразу.') }}
+          {{
+            t(
+              'Все платежи тестовые. После отмены доступ сохраняется до конца срока.',
+            )
+          }}
         </p>
       </section></template
     >

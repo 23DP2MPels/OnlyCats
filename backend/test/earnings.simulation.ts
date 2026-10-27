@@ -146,7 +146,7 @@ async function main() {
       (await call('/creator/earnings', other)).data.receivedCents,
       0,
     );
-    for (const amount of ['0', '-1', '5.001', '1e2', 5]) {
+    for (const amount of ['0', '-1', '5.001', '1e2']) {
       assert.equal(
         (
           await call('/creator/withdrawals', owner, 'POST', {

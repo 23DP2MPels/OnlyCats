@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { api, session } from '../api';
 import { locale, t } from '../i18n';
 
@@ -10,6 +11,27 @@ type LoginEvent = {
   userAgent: string | null;
   createdAt: string;
 };
+const router = useRouter();
+const password = ref('');
+const deleting = ref(false);
+async function deleteAccount() {
+  if (!window.confirm(t('Удалить аккаунт, всех котов и посты навсегда?')))
+    return;
+  busy.value = true;
+  error.value = '';
+  try {
+    await api('/account', {
+      method: 'DELETE',
+      body: JSON.stringify({ password: password.value }),
+    });
+    session.user = null;
+    await router.push('/');
+  } catch (e) {
+    error.value = (e as Error).message;
+  } finally {
+    busy.value = false;
+  }
+}
 const events = ref<LoginEvent[]>([]);
 const busy = ref(false);
 const error = ref('');
@@ -59,6 +81,25 @@ onMounted(load);
 <template>
   <section class="profile-settings" :aria-busy="busy">
     <h2>{{ t('Настройки профиля') }}</h2>
+    <div class="editor-card">
+      <button class="button" @click="deleting = !deleting">
+        {{ t('Удалить аккаунт') }}
+      </button>
+      <form v-if="deleting" @submit.prevent="deleteAccount">
+        <p>{{ t('Удалить аккаунт, всех котов и посты навсегда?') }}</p>
+        <label
+          >{{ t('Пароль')
+          }}<input
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            required
+        /></label>
+        <button class="button" :disabled="busy">
+          {{ t('Удалить навсегда') }}
+        </button>
+      </form>
+    </div>
     <dl class="editor-card profile-details">
       <dt>{{ t('Имя') }}</dt>
       <dd>{{ session.user?.name }}</dd>

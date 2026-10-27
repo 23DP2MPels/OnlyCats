@@ -30,7 +30,7 @@ async function signOut() {
       >
       <nav :aria-label="t('Основная навигация')">
         <RouterLink to="/">{{ t('Лента') }}</RouterLink>
-        <RouterLink to="/explore">{{ t('Найти своего кота') }}</RouterLink
+        <RouterLink to="/explore">{{ t('Поиск') }}</RouterLink
         ><RouterLink to="/account">{{ t('Мой уголок') }}</RouterLink>
       </nav>
       <div class="header-actions">
