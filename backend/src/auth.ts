@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
   createParamDecorator,
@@ -14,13 +15,13 @@ export type SessionUser = {
   id: string;
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN';
+  isAdmin: boolean;
 };
 export const publicUser = {
   id: true,
   email: true,
   name: true,
-  role: true,
+  isAdmin: true,
 } as const;
 export type AuthRequest = Request & { user?: SessionUser };
 export const CurrentUser = createParamDecorator(
@@ -73,4 +74,14 @@ export function sessionToken(user: SessionUser) {
     issuer: 'onlycats',
     audience: 'onlycats-web',
   });
+}
+
+@Injectable()
+export class AdminGuard extends AuthGuard {
+  async canActivate(ctx: ExecutionContext) {
+    await super.canActivate(ctx);
+    if (!ctx.switchToHttp().getRequest<AuthRequest>().user?.isAdmin)
+      throw new ForbiddenException();
+    return true;
+  }
 }

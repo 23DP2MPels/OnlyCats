@@ -32,6 +32,9 @@ async function signOut() {
         <RouterLink to="/">{{ t('Лента') }}</RouterLink>
         <RouterLink to="/explore">{{ t('Поиск') }}</RouterLink
         ><RouterLink to="/account">{{ t('Мой уголок') }}</RouterLink>
+        <RouterLink v-if="session.user?.isAdmin" to="/admin">{{
+          t('Админка')
+        }}</RouterLink>
       </nav>
       <div class="header-actions">
         <label class="language-control">

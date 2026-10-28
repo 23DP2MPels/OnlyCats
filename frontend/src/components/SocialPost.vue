@@ -154,10 +154,7 @@ async function send() {
     />
     <div class="social-post-actions">
       <button
-        v-if="
-          session.user?.id === post.cat.ownerId ||
-          session.user?.role === 'ADMIN'
-        "
+        v-if="session.user?.id === post.cat.ownerId || session.user?.isAdmin"
         :disabled="busy"
         @click="removePost"
       >

@@ -78,7 +78,7 @@ export class SocialController {
     });
     const items = rows.slice(0, 20).map((post) => {
       const allowed =
-        user?.role === 'ADMIN' ||
+        user?.isAdmin ||
         user?.id === post.cat.ownerId ||
         post.cat.subscriptions.length > 0;
       const locked = post.isPrivate && !allowed;
@@ -108,11 +108,7 @@ export class SocialController {
       include: { cat: { select: { ownerId: true } } },
     });
     if (!post) throw new NotFoundException();
-    if (
-      post.isPrivate &&
-      user?.role !== 'ADMIN' &&
-      user?.id !== post.cat.ownerId
-    ) {
+    if (post.isPrivate && !user?.isAdmin && user?.id !== post.cat.ownerId) {
       const sub = user
         ? await this.prisma.subscription.findUnique({
             where: { userId_catId: { userId: user.id, catId: post.catId } },

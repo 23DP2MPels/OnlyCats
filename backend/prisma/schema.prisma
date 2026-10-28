@@ -6,11 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
 enum SubscriptionStatus {
   PENDING
   ACTIVE
@@ -24,7 +19,7 @@ model User {
   email        String         @unique
   name         String
   passwordHash String
-  role         Role           @default(USER)
+  isAdmin      Boolean        @default(false)
   createdAt    DateTime       @default(now())
   cats         Cat[]
   subscriptions Subscription[]

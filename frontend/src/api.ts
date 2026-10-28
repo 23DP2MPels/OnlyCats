@@ -5,7 +5,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN';
+  isAdmin: boolean;
 }
 export interface Cat {
   id: string;

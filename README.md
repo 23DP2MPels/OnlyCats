@@ -182,3 +182,19 @@ vajadzīgs HTTPS, rezerves kopijas, atsevišķi noslēpumi un datu glabātuves u
 
 Kontā atveriet kaķa redaktoru un izvēlieties savu JPEG, PNG vai WebP (līdz 8 MB). Avatāri un publikāciju fotoattēli glabājas PostgreSQL tabulas StoredImage BYTEA laukā.
 Iepriekšējās SQLite datubāzes un uploads importēšana: no backend mapes `node scripts/import-legacy.mjs data/onlycats.db`. Avota faili netiek dzēsti; importējiet pirms seed, lai saglabātu esošos ierakstus. PostgreSQL iepriekšējiem failu fotoattēliem var palaist to pašu skriptu bez argumenta.
+
+### Administratora lapa
+
+Administratoram navigācijā parādās **Administrēšana** (`/admin`). Tajā ir
+lietotāju un publikāciju meklēšana, lapošana, vārda un e-pasta maiņa,
+administratora tiesību piešķiršana/noņemšana un publikāciju dzēšana ar apstiprinājumu.
+Tiesības nosaka `User.isAdmin` datubāzē. Pirmajam administratoram iestatiet:
+
+```sql
+UPDATE "User" SET "isAdmin" = true WHERE email = 'jusu-epasts@example.com';
+```
+
+Pirms jaunās versijas palaišanas izpildiet `npm run db:migrate` un `npm run db:generate`.
+Docker konteinera palaišanas skripts migrācijas izpilda automātiski.
+Migrācija saglabā esošo administratoru tiesības. Publiskā reģistrācija šīs tiesības nepiešķir.
+Administrators nevar noņemt pats sev tiesības. Izmaiņas stājas spēkā nākamajā API pieprasījumā.

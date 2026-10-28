@@ -118,7 +118,7 @@ export class ApiController {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      isAdmin: user.isAdmin,
     };
     await this.prisma.loginEvent.create({
       data: { userId: user.id, kind: 'LOGIN', ...this.loginMetadata(req) },
@@ -216,7 +216,7 @@ export class ApiController {
   private async ownCat(id: string, user: SessionUser) {
     const cat = await this.prisma.cat.findUnique({ where: { id } });
     if (!cat) throw new NotFoundException('Кот не найден');
-    if (cat.ownerId !== user.id && user.role !== 'ADMIN')
+    if (cat.ownerId !== user.id && !user.isAdmin)
       throw new ForbiddenException('Это не ваш кот');
     return cat;
   }
@@ -243,7 +243,7 @@ export class ApiController {
         })
       : null;
     const allowed =
-      user?.id === cat.ownerId || user?.role === 'ADMIN' || hasPaidAccess(sub);
+      user?.id === cat.ownerId || user?.isAdmin || hasPaidAccess(sub);
     const posts = await this.prisma.post.findMany({
       where: { catId: id },
       orderBy: { createdAt: 'desc' },
@@ -341,11 +341,7 @@ export class ApiController {
       include: { cat: true },
     });
     if (!post?.imageKey) throw new NotFoundException();
-    if (
-      post.isPrivate &&
-      user?.id !== post.cat.ownerId &&
-      user?.role !== 'ADMIN'
-    ) {
+    if (post.isPrivate && user?.id !== post.cat.ownerId && !user?.isAdmin) {
       const sub = user
         ? await this.prisma.subscription.findUnique({
             where: { userId_catId: { userId: user.id, catId: post.catId } },
@@ -473,23 +469,10 @@ export class ApiController {
     return this.subscriptions.webhook(headers, event);
   }
 
-  @Get('admin/users') @UseGuards(AuthGuard) async adminUsers(
-    @CurrentUser() user: SessionUser,
-  ) {
-    if (user.role !== 'ADMIN') throw new ForbiddenException();
-    return this.prisma.user.findMany({
-      select: {
-        ...publicUser,
-        createdAt: true,
-        _count: { select: { cats: true, subscriptions: true } },
-      },
-      take: 100,
-    });
-  }
   @Get('admin/withdrawals') @UseGuards(AuthGuard) async adminWithdrawals(
     @CurrentUser() user: SessionUser,
   ) {
-    if (user.role !== 'ADMIN') throw new ForbiddenException();
+    if (!user.isAdmin) throw new ForbiddenException();
     return this.prisma.withdrawalRequest.findMany({
       select: {
         id: true,

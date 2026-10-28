@@ -1,3 +1,4 @@
+import Admin from './views/Admin.vue';
 import UserProfile from './views/UserProfile.vue';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
@@ -20,6 +21,7 @@ const router = createRouter({
     { path: '/cats/:id', component: CatProfile },
     { path: '/login', component: Login },
     { path: '/account', component: Account },
+    { path: '/admin', component: Admin },
     { path: '/payment/return', component: Payment },
     { path: '/:pathMatch(.*)*', component: NotFound },
   ],

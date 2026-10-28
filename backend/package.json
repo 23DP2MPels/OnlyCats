@@ -19,7 +19,8 @@
     "test:account": "node test/account-history-smoke.mjs",
     "test:social": "node test/social-smoke.mjs",
     "test:photos": "node test/photos-smoke.mjs",
-    "test:lifecycle": "node test/lifecycle-smoke.mjs"
+    "test:lifecycle": "node test/lifecycle-smoke.mjs",
+    "test:admin": "node test/admin-smoke.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",

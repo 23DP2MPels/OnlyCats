@@ -201,6 +201,11 @@ onMounted(load);
     <p class="muted">
       {{ t('Здесь живут ваши любимчики и их маленькие истории.') }}
     </p>
+    <p v-if="data?.user.isAdmin" style="margin-top: 1rem">
+      <RouterLink to="/admin" class="button small">{{
+        t('Админка')
+      }}</RouterLink>
+    </p>
     <p v-if="loading" class="empty">{{ t('Загружаем кабинет…') }}</p>
     <p v-if="t(error)" class="error" role="alert">
       {{ t(error) }}

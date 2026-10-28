@@ -21,9 +21,14 @@ izdalīti tīrās funkcijās neatkarīgai testēšanai. Paplašinot sistēmu, ko
 var sadalīt moduļos auth, cats, posts un subscriptions.
 
 Lietotājs var būt savu kaķu īpašnieks un abonēt citu kaķu saturu.
-Atsevišķas CREATOR lomas nav: īpašumtiesības nosaka `Cat.ownerId`. ADMIN var
-moderēt publikācijas ar API. Administratoru izveido sākotnējo datu skripts,
-bet publiskā reģistrācija vienmēr piešķir lomu USER.
+Īpašumtiesības nosaka `Cat.ownerId`. Administratora tiesības nosaka tikai
+`User.isAdmin` datubāzē. Publiskā reģistrācija vienmēr izveido lietotāju ar
+`isAdmin = false`. Katra autentificēta pieprasījuma laikā tiesības tiek nolasītas
+no datubāzes; JWT nesatur tiesību kopiju. Lapa `/admin` ļauj meklēt un mainīt
+lietotāju vārdus, e-pastus un administratora tiesības, kā arī dzēst publikācijas.
+`AdminGuard` aizsargā administratora API; paroles un to jaucējvērtības neatklāj.
+Administrators nevar sev noņemt tiesības. Migrācija saglabā iepriekšējo
+ADMIN lietotāju tiesības laukā `isAdmin`.
 
 Privātai publikācijai bez piekļuves atgriež tikai virsrakstu, datumu un bloķēšanas
 pazīmi. Tekstu, faila atslēgu un attēla URL neatklāj. Failus neizsniedz statiski:

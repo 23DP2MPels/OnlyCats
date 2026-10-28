@@ -1,3 +1,4 @@
+import { AdminController } from './admin.controller';
 import { CommunityController } from './community.controller';
 import 'reflect-metadata';
 import { Module, ValidationPipe } from '@nestjs/common';
@@ -11,7 +12,7 @@ import { resolve } from 'node:path';
 import { ApiController } from './api.controller';
 import { SocialController } from './social.controller';
 import { PrismaService } from './prisma.service';
-import { AuthGuard, OptionalAuthGuard } from './auth';
+import { AdminGuard, AuthGuard, OptionalAuthGuard } from './auth';
 import { PaypalService } from './paypal.service';
 import { SubscriptionsService } from './subscriptions.service';
 import { config, validateConfig } from './config';
@@ -22,6 +23,7 @@ import { AccountController } from './account.controller';
 @Module({
   controllers: [
     ApiController,
+    AdminController,
     SocialController,
     CreatorController,
     AccountController,
@@ -33,6 +35,7 @@ import { AccountController } from './account.controller';
     SubscriptionsService,
     EarningsService,
     AuthGuard,
+    AdminGuard,
     OptionalAuthGuard,
   ],
 })

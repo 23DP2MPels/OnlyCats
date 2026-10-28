@@ -38,7 +38,7 @@ async function main() {
       email: 'admin@onlycats.test',
       name: 'Администратор',
       passwordHash,
-      role: 'ADMIN',
+      isAdmin: true,
     },
   });
   const cats = [
